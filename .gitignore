@@ -1,0 +1,26 @@
+/chaves/*
+
+# Diretórios e arquivos do Terraform
+.terraform/
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.backup
+crash.log
+
+# Variáveis sensíveis
+*.tfvars
+*.tfvars.json
+
+# Arquivos de saída do Terraform
+*.tfplan
+plan.out
+
+# Credenciais e configurações locais
+terraform.rc
+terraform.tfvars.local
+
+# Logs e arquivos temporários
+*.log
+*.bak
+*.swp
