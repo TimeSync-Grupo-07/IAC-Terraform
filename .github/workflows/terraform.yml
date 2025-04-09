@@ -1,0 +1,37 @@
+name: Terraform CI
+
+on:
+  push:
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+  pull_request:
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+
+jobs:
+  terraform:
+    name: Validar Infraestrutura Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0 # ajuste se necessário
+
+      - name: Validar formatação (terraform fmt)
+        run: terraform fmt -check -recursive
+
+      - name: Inicializar Terraform (terraform init)
+        run: terraform init
+
+      - name: Validar sintaxe (terraform validate)
+        run: terraform validate
+
+      - name: Gerar plano (terraform plan)
+        run: terraform plan -input=false
