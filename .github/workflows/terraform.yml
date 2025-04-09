@@ -1,11 +1,9 @@
-name: Terraform CI
+name: Terraform CI PR Dev → Homolog
 
 on:
-  push:
-    paths:
-      - '**.tf'
-      - '**.tfvars'
   pull_request:
+    branches:
+      - Homolog  # <- destino do PR (base branch)
     paths:
       - '**.tf'
       - '**.tfvars'
@@ -15,6 +13,8 @@ jobs:
     name: Validar Infraestrutura Terraform
     runs-on: ubuntu-latest
 
+    if: github.head_ref == 'Dev'  # <- origem do PR (source branch)
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -22,16 +22,16 @@ jobs:
       - name: Configurar Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0 # ajuste se necessário
+          terraform_version: 1.6.0
 
-      - name: Validar formatação (terraform fmt)
+      - name: Validar formatação
         run: terraform fmt -check -recursive
 
-      - name: Inicializar Terraform (terraform init)
+      - name: Inicializar Terraform
         run: terraform init
 
-      - name: Validar sintaxe (terraform validate)
+      - name: Validar sintaxe
         run: terraform validate
 
-      - name: Gerar plano (terraform plan)
+      - name: Gerar plano
         run: terraform plan -input=false
