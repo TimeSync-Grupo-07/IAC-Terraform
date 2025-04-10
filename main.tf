@@ -24,15 +24,15 @@ module "maquinas" {
   depends_on = [ module.rede ]
 }
 
-# module "s3" {
-#   source = "./modules/s3"
+module "s3" {
+  source = "./modules/s3"
 
-#   vpc_id               = module.rede.vpc_id
-#   private_route_table_id = module.rede.private_route_table_id
-#   region               = "us-east-1"
+  vpc_id               = module.rede.vpc_id
+  private_route_table_id = module.rede.private_route_table_id
+  region               = "us-east-1"
 
-#   depends_on = [module.rede]
-# }
+  depends_on = [module.rede]
+}
 
 module "acls" {
   source = "./modules/acls"
