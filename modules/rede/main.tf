@@ -123,7 +123,7 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-resource "aws_security_group" "private_sg_api" {
+resource "aws_security_group" "private_sg" {
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -148,59 +148,6 @@ resource "aws_security_group" "private_sg_api" {
   }
 
   tags = {
-    Name = "private-sg-api"
+    Name = "private-sg"
   }
-}
-
-resource "aws_security_group" "private_sg_db" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
-  }
-
-  ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    security_groups = [aws_security_group.private_sg_api.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "private-sg-db"
-  }
-}
-
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
-
-output "public_subnet_id" {
-  value = aws_subnet.public.id
-}
-
-output "private_subnet_id" {
-  value = aws_subnet.private.id
-}
-
-output "public_sg_id" {
-  value = aws_security_group.public_sg.id
-}
-
-output "private_sg_api_id" {
-  value = aws_security_group.private_sg_api.id
-}
-
-output "private_sg_db_id" {
-  value = aws_security_group.private_sg_db.id
 }

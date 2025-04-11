@@ -14,10 +14,6 @@ variable "public_sg_id" {
   type = string
 }
 
-variable "private_sg_api_id" {
-  type = string
-}
-
-variable "private_sg_db_id" {
+variable "private_sg_id" {
   type = string
 }

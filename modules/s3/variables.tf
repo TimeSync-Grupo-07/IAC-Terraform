@@ -3,9 +3,9 @@ variable "region" {
 }
 
 variable "vpc_id" {
-  type = number
+  type = string
 }
 
 variable "private_route_table_id" {
-  type = number
+  type = string
 }

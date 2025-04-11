@@ -18,8 +18,7 @@ module "maquinas" {
   public_subnet_id = module.rede.public_subnet_id
   private_subnet_id = module.rede.private_subnet_id
   public_sg_id = module.rede.public_sg_id
-  private_sg_api_id = module.rede.private_sg_api_id
-  private_sg_db_id = module.rede.private_sg_db_id
+  private_sg_id = module.rede.private_sg_id
 
   depends_on = [ module.rede ]
 }
