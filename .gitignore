@@ -7,7 +7,8 @@
 terraform.tfstate
 terraform.tfstate.backup
 crash.log
-
+terraform.tfstate.*
+*.backup
 # Variáveis sensíveis
 *.tfvars
 *.tfvars.json

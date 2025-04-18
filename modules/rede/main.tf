@@ -17,13 +17,23 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_python" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_block
+  cidr_block        = var.private_python_subnet_cidr_block
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet"
+    Name = "private-subnet-python"
+  }
+}
+
+resource "aws_subnet" "private_mysql" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.private_mysql_subnet_cidr_block
+  availability_zone = var.availability_zone
+
+  tags = {
+    Name = "private-subnet-mysql"
   }
 }
 
@@ -89,8 +99,13 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private_assoc" {
-  subnet_id      = aws_subnet.private.id
+resource "aws_route_table_association" "private_python_assoc" {
+  subnet_id      = aws_subnet.private_python.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_mysql_assoc" {
+  subnet_id      = aws_subnet.private_mysql.id
   route_table_id = aws_route_table.private.id
 }
 
@@ -127,16 +142,23 @@ resource "aws_security_group" "private_sg" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.public_sg.id]
+  }
+    ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lambda_sg.id]
+    description     = "Permitir acesso da Lambda ao MySQL"
   }
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
     security_groups = [aws_security_group.public_sg.id]
   }
 
@@ -149,5 +171,22 @@ resource "aws_security_group" "private_sg" {
 
   tags = {
     Name = "private-sg"
+  }
+}
+
+resource "aws_security_group" "lambda_sg" {
+  name        = "lambda-sg"
+  description = "Security group for Lambda functions"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "lambda-sg"
   }
 }

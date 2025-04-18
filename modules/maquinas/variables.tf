@@ -6,7 +6,11 @@ variable "public_subnet_id" {
   type = string
 }
 
-variable "private_subnet_id" {
+variable "private_python_subnet_id" {
+  type = string
+}
+
+variable "private_mysql_subnet_id" {
   type = string
 }
 
