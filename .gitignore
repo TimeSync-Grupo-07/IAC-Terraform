@@ -25,3 +25,10 @@ terraform.tfvars.local
 *.log
 *.bak
 *.swp
+
+# Zips das lambdas
+modules/lambda_functions/code/*.zip
+
+# Diretório temporário de clone
+temp_lambda_code/
+
