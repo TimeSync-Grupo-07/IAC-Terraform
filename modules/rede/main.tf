@@ -2,7 +2,7 @@ resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr_block
 
   tags = {
-    Name = "main-vpc"
+    Name = "TimeSync-vpc"
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_subnet" "private_python" {
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet-python"
+    Name = "private-subnet-leitor-email"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_subnet" "private_mysql" {
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet-mysql"
+    Name = "private-subnet-database"
   }
 }
 
@@ -151,8 +151,7 @@ resource "aws_security_group" "private_sg" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_sg.id]
-    description     = "Permitir acesso da Lambda ao MySQL"
+    security_groups = [aws_security_group.public_sg.id]
   }
 
   ingress {
@@ -171,22 +170,5 @@ resource "aws_security_group" "private_sg" {
 
   tags = {
     Name = "private-sg"
-  }
-}
-
-resource "aws_security_group" "lambda_sg" {
-  name        = "lambda-sg"
-  description = "Security group for Lambda functions"
-  vpc_id      = aws_vpc.main.id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "lambda-sg"
   }
 }

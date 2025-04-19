@@ -11,11 +11,6 @@ resource "aws_lambda_function" "process_raw_lambda" {
   runtime          = "python3.11"
   timeout          = 60
 
-  vpc_config {
-    subnet_ids         = var.private_subnet_ids
-    security_group_ids = [var.lambda_sg_id]
-  }
-
   environment {
     variables = {
       RAW_BUCKET = var.raw_bucket_name
@@ -31,11 +26,6 @@ resource "aws_lambda_function" "process_trusted_lambda" {
   runtime          = "python3.11"
   timeout          = 60
 
-  vpc_config {
-    subnet_ids         = var.private_subnet_ids
-    security_group_ids = [var.lambda_sg_id]
-  }
-
   environment {
     variables = {
       TRUSTED_BUCKET = var.trusted_bucket_name
@@ -45,4 +35,46 @@ resource "aws_lambda_function" "process_trusted_lambda" {
       MYSQL_DB       = var.mysql_db
     }
   }
+}
+resource "aws_s3_bucket_notification" "raw_trigger" {
+  bucket = var.raw_bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.process_raw_lambda.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = ""
+    filter_suffix       = ".csv"
+  }
+
+  depends_on = [aws_lambda_permission.allow_s3_to_invoke_raw]
+}
+
+
+resource "aws_s3_bucket_notification" "trusted_trigger" {
+  bucket = var.trusted_bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.process_trusted_lambda.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = ""
+    filter_suffix       = ".csv"
+  }
+  
+  depends_on = [aws_lambda_permission.allow_s3_to_invoke_trusted]
+}
+
+resource "aws_lambda_permission" "allow_s3_to_invoke_raw" {
+  statement_id  = "AllowExecutionFromS3Raw"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.process_raw_lambda.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = "arn:aws:s3:::${var.raw_bucket_name}"
+}
+
+resource "aws_lambda_permission" "allow_s3_to_invoke_trusted" {
+  statement_id  = "AllowExecutionFromS3Trusted"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.process_trusted_lambda.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = "arn:aws:s3:::${var.trusted_bucket_name}"
 }

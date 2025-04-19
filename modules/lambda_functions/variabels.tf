@@ -2,10 +2,6 @@ variable "private_subnet_ids" {
   type = list(string)
 }
 
-variable "lambda_sg_id" {
-  type = string
-}
-
 variable "mysql_host" {
   type = string
 }

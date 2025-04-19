@@ -2,7 +2,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Carrega variáveis do ambiente
 locals {
   env_vars = {
     email_address = var.email_address != "" ? var.email_address : "default@example.com"
@@ -60,7 +59,6 @@ module "lambda" {
   source = "./modules/lambda_functions"
 
   private_subnet_ids    = [module.rede.private_python_subnet_id, module.rede.private_mysql_subnet_id]
-  lambda_sg_id          = module.rede.lambda_sg_id
   raw_bucket_name       = module.s3.raw_bucket_name
   trusted_bucket_name   = module.s3.trusted_bucket_name
   mysql_host            = module.maquinas.private_mysql_ip
@@ -68,4 +66,9 @@ module "lambda" {
   mysql_password        = local.env_vars.mysql_password
   mysql_db              = local.env_vars.mysql_db
   account_id            = local.env_vars.account_id
+}
+
+module "email_sqs" {
+  source     = "./modules/sqs"
+  queue_name = "fila-emails"
 }

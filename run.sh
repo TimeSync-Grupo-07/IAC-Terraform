@@ -3,8 +3,11 @@
 set -e
 
 export $(grep -v '^#' .env | xargs)
-echo "🔄 Empacotando funções Lambda via Docker..."
-./deploy_lambda.sh
+
+if [ "$1" = "apply" ]; then
+    echo "🔄 Empacotando funções Lambda via Docker..."
+    ./deploy_lambda.sh
+fi
 
 echo "🚀 Executando Terraform..."
 terraform "$@" \
