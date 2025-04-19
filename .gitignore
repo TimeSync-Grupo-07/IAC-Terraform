@@ -32,3 +32,5 @@ modules/lambda_functions/code/*.zip
 # Diretório temporário de clone
 temp_lambda_code/
 
+.env
+
