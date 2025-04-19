@@ -21,6 +21,8 @@ plan.out
 terraform.rc
 terraform.tfvars.local
 
+*.backup
+
 # Logs e arquivos temporários
 *.log
 *.bak
