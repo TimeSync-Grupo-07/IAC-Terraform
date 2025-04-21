@@ -1,11 +1,6 @@
 
 data "template_file" "user_data_public" {
   template = file("${path.module}/arquivos/user_data_node.sh.tpl")
-  vars = {
-    DB_HOST = aws_instance.mysql_instance.private_ip
-    DB_USER = var.db_user
-    DB_PASS = var.db_pass
-  }
 }
 
 data "template_file" "user_data_mysql" {
@@ -43,93 +38,91 @@ resource "aws_instance" "public_instance" {
     destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
   }
 
-provisioner "remote-exec" {
-  inline = [
-    "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
-    "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
-  ]
-}
-
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
+    ]
+  }
 
   tags = {
     Name = "public-instance-jenkins"
   }
 
   depends_on = [aws_instance.mysql_instance]
-
 }
 
-resource "aws_instance" "mysql_instance" {
-  ami                    = "ami-04b4f1a9cf54c11d0"
-  instance_type          = "t2.micro"
-  subnet_id              = var.private_mysql_subnet_id
-  vpc_security_group_ids = [var.private_sg_id]
-  key_name               = "Key-Private-MYSQL-02"
-  iam_instance_profile   = "LabInstanceProfile"
-  user_data = data.template_file.user_data_mysql.rendered
+  resource "aws_instance" "mysql_instance" {
+    ami                    = "ami-04b4f1a9cf54c11d0"
+    instance_type          = "t2.micro"
+    subnet_id              = var.private_mysql_subnet_id
+    vpc_security_group_ids = [var.private_sg_id]
+    key_name               = "Key-Private-MYSQL-02"
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.user_data_mysql.rendered
 
-  tags = {
-    Name = "private-mysql-instance"
-  }
-
-}
-
-resource "aws_instance" "python_instance" {
-  ami                    = "ami-04b4f1a9cf54c11d0"
-  instance_type          = "t2.micro"
-  subnet_id              = var.private_python_subnet_id
-  vpc_security_group_ids = [var.private_sg_id]
-  key_name               = "Key-Private-Python-01"
-  iam_instance_profile   = "LabInstanceProfile"
-  user_data = data.template_file.user_data_public.rendered
-
-  tags = {
-    Name = "private-python-instance"
-  }
-}
-
-resource "null_resource" "wait_for_docker_mysql" {
-  depends_on = [aws_instance.python_instance]
-
-  provisioner "remote-exec" {
-    connection {
-      type                = "ssh"
-      user                = "ubuntu"
-      private_key         = file("./chaves/Key-Private-MYSQL-02.pem")
-      host                = aws_instance.mysql_instance.private_ip
-      bastion_host        = aws_instance.public_instance.public_ip
-      bastion_user        = "ubuntu"
-      bastion_private_key = file("./chaves/Key-Public-01.pem")
+    tags = {
+      Name = "private-mysql-instance"
     }
 
-    inline = [
-      "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
-      "echo Docker iniciado com sucesso"
-    ]
-
   }
 
-}
+  resource "aws_instance" "python_instance" {
+    ami                    = "ami-04b4f1a9cf54c11d0"
+    instance_type          = "t2.micro"
+    subnet_id              = var.private_python_subnet_id
+    vpc_security_group_ids = [var.private_sg_id]
+    key_name               = "Key-Private-Python-01"
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.user_data_python.rendered
 
-resource "null_resource" "wait_for_docker_python" {
-  depends_on = [aws_instance.python_instance]
+    tags = {
+      Name = "private-python-instance"
+    }
+  }
 
-  provisioner "remote-exec" {
-    connection {
-      type                = "ssh"
-      user                = "ubuntu"
-      private_key         = file("./chaves/Key-Private-Python-01.pem")
-      host                = aws_instance.python_instance.private_ip
-      bastion_host        = aws_instance.public_instance.public_ip
-      bastion_user        = "ubuntu"
-      bastion_private_key = file("./chaves/Key-Public-01.pem")
+  resource "null_resource" "wait_for_docker_mysql" {
+    depends_on = [aws_instance.python_instance]
+
+    provisioner "remote-exec" {
+      connection {
+        type                = "ssh"
+        user                = "ubuntu"
+        private_key         = file("./chaves/Key-Private-MYSQL-02.pem")
+        host                = aws_instance.mysql_instance.private_ip
+        bastion_host        = aws_instance.public_instance.public_ip
+        bastion_user        = "ubuntu"
+        bastion_private_key = file("./chaves/Key-Public-01.pem")
+      }
+
+      inline = [
+        "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
+        "echo Docker iniciado com sucesso"
+      ]
+
     }
 
-    inline = [
-      "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
-      "echo Docker iniciado com sucesso"
-    ]
-
   }
 
-}
+  resource "null_resource" "wait_for_docker_python" {
+    depends_on = [aws_instance.python_instance]
+
+    provisioner "remote-exec" {
+      connection {
+        type                = "ssh"
+        user                = "ubuntu"
+        private_key         = file("./chaves/Key-Private-Python-01.pem")
+        host                = aws_instance.python_instance.private_ip
+        bastion_host        = aws_instance.public_instance.public_ip
+        bastion_user        = "ubuntu"
+        bastion_private_key = file("./chaves/Key-Public-01.pem")
+      }
+
+      inline = [
+        "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
+        "echo Docker iniciado com sucesso"
+      ]
+
+    }
+
+  }

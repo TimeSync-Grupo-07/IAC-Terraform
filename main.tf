@@ -21,8 +21,6 @@ module "maquinas" {
   private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
   public_sg_id               = module.rede.public_sg_id
   private_sg_id              = module.rede.private_sg_id
-  db_pass = "urubu100"
-  db_user = "root"
 }
 
 module "s3" {
