@@ -2,16 +2,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-locals {
-  env_vars = {
-    email_address = var.email_address != "" ? var.email_address : "default@example.com"
-    mysql_user    = var.mysql_user
-    mysql_password = var.mysql_password
-    mysql_db      = var.mysql_db
-    account_id    = var.account_id
-  }
-}
-
 module "rede" {
   source = "./modules/rede"
 
@@ -31,6 +21,8 @@ module "maquinas" {
   private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
   public_sg_id               = module.rede.public_sg_id
   private_sg_id              = module.rede.private_sg_id
+  db_pass = "urubu100"
+  db_user = "root"
 }
 
 module "s3" {
@@ -48,24 +40,8 @@ module "acls" {
   public_subnet_id           = module.rede.public_subnet_id
   private_python_subnet_id   = module.rede.private_python_subnet_id
   private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
-}
 
-module "sns" {
-  source        = "./modules/sns"
-  email_address = local.env_vars.email_address
-}
-
-module "lambda" {
-  source = "./modules/lambda_functions"
-
-  private_subnet_ids    = [module.rede.private_python_subnet_id, module.rede.private_mysql_subnet_id]
-  raw_bucket_name       = module.s3.raw_bucket_name
-  trusted_bucket_name   = module.s3.trusted_bucket_name
-  mysql_host            = module.maquinas.private_mysql_ip
-  mysql_user            = local.env_vars.mysql_user
-  mysql_password        = local.env_vars.mysql_password
-  mysql_db              = local.env_vars.mysql_db
-  account_id            = local.env_vars.account_id
+  depends_on = [ module.maquinas ]
 }
 
 module "email_sqs" {

@@ -21,3 +21,12 @@ variable "public_sg_id" {
 variable "private_sg_id" {
   type = string
 }
+
+variable "db_user" {
+  type        = string
+}
+
+variable "db_pass" {
+  type        = string
+}
+

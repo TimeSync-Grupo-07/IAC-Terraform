@@ -29,10 +29,6 @@ resource "aws_lambda_function" "process_trusted_lambda" {
   environment {
     variables = {
       TRUSTED_BUCKET = var.trusted_bucket_name
-      MYSQL_HOST     = var.mysql_host
-      MYSQL_USER     = var.mysql_user
-      MYSQL_PASSWORD = var.mysql_password
-      MYSQL_DB       = var.mysql_db
     }
   }
 }
