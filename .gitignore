@@ -28,6 +28,8 @@ terraform.tfvars.local
 *.bak
 *.swp
 
+maquinas/arquivos/*
+
 # Zips das lambdas
 modules/lambda_functions/code/*.zip
 
