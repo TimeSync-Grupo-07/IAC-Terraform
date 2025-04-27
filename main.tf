@@ -23,14 +23,6 @@ module "maquinas" {
   private_sg_id              = module.rede.private_sg_id
 }
 
-module "s3" {
-  source = "./modules/s3"
-
-  vpc_id               = module.rede.vpc_id
-  private_route_table_id = module.rede.private_route_table_id
-  region               = "us-east-1"
-}
-
 module "acls" {
   source                     = "./modules/acls"
   vpc_id                     = module.rede.vpc_id
@@ -42,7 +34,24 @@ module "acls" {
   depends_on = [ module.maquinas ]
 }
 
-module "email_sqs" {
-  source     = "./modules/sqs"
-  queue_name = "fila-emails"
+resource "aws_sns_topic" "raw_topic" {
+  name = "raw-processing-topic"
+}
+
+resource "aws_sns_topic_subscription" "email_sub" {
+  topic_arn = aws_sns_topic.raw_topic.arn
+  protocol  = "email"
+  endpoint  = "davi.rsilva@sptech.school"
+}
+module "lambda" {
+
+  source = "./modules/lambda_functions"
+
+  private_subnet_ids = [module.rede.private_python_subnet_id,module.rede.private_mysql_subnet_id]
+  raw_bucket_name = "timesync-raw-841051091018312111099"
+  trusted_bucket_name = "timesync-trusted-841051091018312111099"
+  account_id = "005948301962"
+  backup_bucket_name = "timesync-backup-841051091018312111099"
+  raw_topic_arn = aws_sns_topic.raw_topic.arn
+
 }

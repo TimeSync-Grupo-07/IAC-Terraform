@@ -1,6 +1,11 @@
 
 data "template_file" "user_data_public" {
   template = file("${path.module}/arquivos/user_data_node.sh.tpl")
+  vars = {
+    DB_HOST = aws_instance.mysql_instance.private_ip
+    PYTHON_HOST = aws_instance.python_instance.private_ip
+  }
+  
 }
 
 data "template_file" "user_data_mysql" {
@@ -12,7 +17,7 @@ data "template_file" "user_data_python" {
 }
 
 resource "aws_instance" "public_instance" {
-  ami                         = "ami-04b4f1a9cf54c11d0"
+  ami                         = "ami-084568db4383264d4"
   instance_type               = "t2.micro"
   subnet_id                   = var.public_subnet_id
   vpc_security_group_ids      = [var.public_sg_id]
@@ -53,7 +58,7 @@ resource "aws_instance" "public_instance" {
 }
 
   resource "aws_instance" "mysql_instance" {
-    ami                    = "ami-04b4f1a9cf54c11d0"
+    ami                    = "ami-084568db4383264d4"
     instance_type          = "t2.micro"
     subnet_id              = var.private_mysql_subnet_id
     vpc_security_group_ids = [var.private_sg_id]
@@ -68,7 +73,7 @@ resource "aws_instance" "public_instance" {
   }
 
   resource "aws_instance" "python_instance" {
-    ami                    = "ami-04b4f1a9cf54c11d0"
+    ami                    = "ami-084568db4383264d4"
     instance_type          = "t2.micro"
     subnet_id              = var.private_python_subnet_id
     vpc_security_group_ids = [var.private_sg_id]

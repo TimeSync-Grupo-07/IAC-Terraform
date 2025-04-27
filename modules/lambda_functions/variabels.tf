@@ -10,6 +10,14 @@ variable "trusted_bucket_name" {
   type = string
 }
 
+variable "backup_bucket_name" {
+  type = string
+}
+
+variable "raw_topic_arn" {
+  type = string
+}
+
 variable "account_id" {
   type = string
 }
