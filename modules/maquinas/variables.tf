@@ -18,7 +18,11 @@ variable "public_sg_id" {
   type = string
 }
 
-variable "private_sg_id" {
+variable "private_sg_database_id" {
+  type = string
+}
+
+variable "private_sg_api_id" {
   type = string
 }
 

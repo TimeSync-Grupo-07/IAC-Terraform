@@ -15,7 +15,7 @@ output "public_subnet_id" {
 }
 
 output "private_python_subnet_id" {
-  value = aws_subnet.private_python.id
+  value = aws_subnet.private_api.id
 }
 
 output "private_mysql_subnet_id" {
@@ -26,6 +26,10 @@ output "public_sg_id" {
   value = aws_security_group.public_sg.id
 }
 
-output "private_sg_id" {
-  value = aws_security_group.private_sg.id
+output "private_sg_api_id" {
+  value = aws_security_group.private_sg_api.id
+}
+
+output "private_sg_database_id" {
+  value = aws_security_group.private_sg_database.id
 }

@@ -48,6 +48,15 @@ resource "aws_network_acl" "public" {
     to_port    = 65535
   }
 
+  ingress {
+    protocol = "tcp"
+    rule_no = 105
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port = 993
+    to_port = 993
+  }
+
   egress {
     protocol   = "-1"
     rule_no    = 200
@@ -62,7 +71,7 @@ resource "aws_network_acl" "public" {
   }
 }
 
-resource "aws_network_acl" "private" {
+resource "aws_network_acl" "private_1" {
   vpc_id = var.vpc_id
 
   # Entrada da própria VPC
@@ -77,15 +86,6 @@ resource "aws_network_acl" "private" {
 
   ingress {
     protocol   = "tcp"
-    rule_no    = 101
-    action     = "allow"
-    cidr_block = var.vpc_cidr_block
-    from_port  = 3306
-    to_port    = 3306
-  }
-
-  ingress {
-    protocol   = "tcp"
     rule_no    = 102
     action     = "allow"
     cidr_block = var.vpc_cidr_block
@@ -93,61 +93,47 @@ resource "aws_network_acl" "private" {
     to_port    = 8080
   }
 
-  # Retorno de conexões (porta alta)
-  ingress {
-    protocol   = "tcp"
-    rule_no    = 103
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 1024
-    to_port    = 65535
-  }
-
-  # Saída para internet (via NAT)
   egress {
-    protocol   = "tcp"
+    protocol   = "-1"
     rule_no    = 200
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 80
-    to_port    = 80
+    cidr_block = var.vpc_cidr_block
+    from_port  = 0
+    to_port    = 0
   }
 
-  egress {
+  tags = {
+    Name = "acl-private"
+  }
+}
+
+resource "aws_network_acl" "private_2" {
+  vpc_id = var.vpc_id
+  ingress {
     protocol   = "tcp"
-    rule_no    = 201
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 443
-    to_port    = 443
-  }
-
-  # DNS
-  egress {
-    protocol   = "udp"
-    rule_no    = 202
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  egress {
-    protocol   = "tcp"
-    rule_no    = 203
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 53
-    to_port    = 53
-  }
-
-  egress {
-    protocol   = "tcp"
-    rule_no    = 204
+    rule_no    = 100
     action     = "allow"
     cidr_block = var.vpc_cidr_block
-    from_port  = 1024
-    to_port    = 65535
+    from_port  = 22
+    to_port    = 22
+  }
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 102
+    action     = "allow"
+    cidr_block = var.vpc_cidr_block
+    from_port  = 3306
+    to_port    = 3306
+  }
+
+  egress {
+    protocol   = "-1"
+    rule_no    = 200
+    action     = "allow"
+    cidr_block = var.vpc_cidr_block
+    from_port  = 0
+    to_port    = 0
   }
 
   tags = {
@@ -163,10 +149,10 @@ resource "aws_network_acl_association" "public" {
 
 resource "aws_network_acl_association" "private_python" {
   subnet_id      = var.private_python_subnet_id
-  network_acl_id = aws_network_acl.private.id
+  network_acl_id = aws_network_acl.private_1.id
 }
 
 resource "aws_network_acl_association" "private_mysql" {
   subnet_id      = var.private_mysql_subnet_id
-  network_acl_id = aws_network_acl.private.id
+  network_acl_id = aws_network_acl.private_2.id
 }

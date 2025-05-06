@@ -17,7 +17,3 @@ output "private_python_ip" {
 output "private_mysql_ip" {
   value = aws_instance.mysql_instance.private_ip
 }
-
-# output "mysql_ip" {
-#     value = self.private_ip
-#   }

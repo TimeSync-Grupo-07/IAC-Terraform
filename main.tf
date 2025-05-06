@@ -7,12 +7,15 @@ module "rede" {
 
   vpc_cidr_block           = "10.0.0.0/23"
   public_subnet_cidr_block = "10.0.0.0/24"
-  private_python_subnet_cidr_block = "10.0.1.0/25"
+  private_api_subnet_cidr_block = "10.0.1.0/25"
   private_mysql_subnet_cidr_block = "10.0.1.128/25"
   availability_zone        = "us-east-1a"
 }
 
 module "maquinas" {
+
+  depends_on = [ module.rede ]
+
   source                     = "./modules/maquinas"
 
   vpc_id = module.rede.vpc_id
@@ -20,7 +23,8 @@ module "maquinas" {
   private_python_subnet_id   = module.rede.private_python_subnet_id
   private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
   public_sg_id               = module.rede.public_sg_id
-  private_sg_id              = module.rede.private_sg_id
+  private_sg_api_id          = module.rede.private_sg_api_id
+  private_sg_database_id     = module.rede.private_sg_database_id
 }
 
 module "acls" {
@@ -53,5 +57,5 @@ module "lambda" {
   account_id = "005948301962"
   backup_bucket_name = "timesync-backup-841051091018312111099"
   raw_topic_arn = aws_sns_topic.raw_topic.arn
-
+  backup_sns_topic_arn = aws_sns_topic.raw_topic.arn
 }

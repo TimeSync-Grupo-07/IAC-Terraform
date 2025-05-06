@@ -17,7 +17,7 @@ data "template_file" "user_data_python" {
 }
 
 resource "aws_instance" "public_instance" {
-  ami                         = "ami-084568db4383264d4"
+  ami                         = "ami-0f9de6e2d2f067fca"
   instance_type               = "t2.micro"
   subnet_id                   = var.public_subnet_id
   vpc_security_group_ids      = [var.public_sg_id]
@@ -57,26 +57,70 @@ resource "aws_instance" "public_instance" {
   depends_on = [aws_instance.mysql_instance]
 }
 
-  resource "aws_instance" "mysql_instance" {
-    ami                    = "ami-084568db4383264d4"
-    instance_type          = "t2.micro"
-    subnet_id              = var.private_mysql_subnet_id
-    vpc_security_group_ids = [var.private_sg_id]
-    key_name               = "Key-Private-MYSQL-02"
-    iam_instance_profile   = "LabInstanceProfile"
-    user_data = data.template_file.user_data_mysql.rendered
+resource "aws_instance" "public_instance_monitoramento" {
+  ami                         = "ami-0f9de6e2d2f067fca"
+  instance_type               = "t2.micro"
+  subnet_id                   = var.public_subnet_id
+  vpc_security_group_ids      = [var.public_sg_id]
+  key_name                    = "Key-Public-02"
+  iam_instance_profile        = "LabInstanceProfile"
+  associate_public_ip_address = true
 
-    tags = {
-      Name = "private-mysql-instance"
-    }
-
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("./chaves/Key-Public-02.pem")
+    host        = self.public_ip
   }
 
+  provisioner "file" {
+    source      = "./chaves/Key-Private-MYSQL-02.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
+  }
+
+  provisioner "file" {
+    source      = "./chaves/Key-Private-Python-01.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
+  }
+
+  provisioner "file" {
+    source      = "./chaves/Key-Private-API-01.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-API-01.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-API-01.pem"
+    ]
+  }
+
+  tags = {
+    Name = "public-instance-monitoramento"
+  }
+
+  depends_on = [aws_instance.mysql_instance]
+}
+
+resource "aws_instance" "mysql_instance" {
+  ami                    = "ami-0f9de6e2d2f067fca"
+  instance_type          = "t2.micro"
+  subnet_id              = var.private_mysql_subnet_id
+  vpc_security_group_ids = [var.private_sg_database_id]
+  key_name               = "Key-Private-MYSQL-02"
+  iam_instance_profile   = "LabInstanceProfile"
+  user_data = data.template_file.user_data_mysql.rendered
+  tags = {
+    Name = "private-mysql-instance"
+  }
+}
+
   resource "aws_instance" "python_instance" {
-    ami                    = "ami-084568db4383264d4"
+    ami                    = "ami-0f9de6e2d2f067fca"
     instance_type          = "t2.micro"
     subnet_id              = var.private_python_subnet_id
-    vpc_security_group_ids = [var.private_sg_id]
+    vpc_security_group_ids = [var.private_sg_api_id]
     key_name               = "Key-Private-Python-01"
     iam_instance_profile   = "LabInstanceProfile"
     user_data = data.template_file.user_data_python.rendered
@@ -86,8 +130,22 @@ resource "aws_instance" "public_instance" {
     }
   }
 
+  resource "aws_instance" "api_instance" {
+    ami                    = "ami-0f9de6e2d2f067fca"
+    instance_type          = "t2.micro"
+    subnet_id              = var.private_python_subnet_id
+    vpc_security_group_ids = [var.private_sg_api_id]
+    key_name               = "Key-Private-API-01"
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.user_data_python.rendered
+
+    tags = {
+      Name = "private-API-instance"
+    }
+  }
+
   resource "null_resource" "wait_for_docker_mysql" {
-    depends_on = [aws_instance.python_instance]
+    depends_on = [aws_instance.public_instance]
 
     provisioner "remote-exec" {
       connection {
@@ -110,7 +168,7 @@ resource "aws_instance" "public_instance" {
   }
 
   resource "null_resource" "wait_for_docker_python" {
-    depends_on = [aws_instance.python_instance]
+    depends_on = [aws_instance.public_instance]
 
     provisioner "remote-exec" {
       connection {
