@@ -1,157 +1,191 @@
-resource "aws_instance" "private_instance_db" {
-  ami                  = "ami-04b4f1a9cf54c11d0"
-  instance_type        = "t2.micro"
-  subnet_id            = var.private_subnet_id
-  vpc_security_group_ids = [var.private_sg_db_id]
-  key_name            = "Key-Private-DB-01"
 
-  provisioner "file" {
-    source      = "./automacoes/deploy_banco.sh"
-    destination = "/home/ubuntu/deploy_banco.sh"    
+data "template_file" "user_data_public" {
+  template = file("${path.module}/arquivos/user_data_node.sh.tpl")
+  vars = {
+    DB_HOST = aws_instance.mysql_instance.private_ip
+    PYTHON_HOST = aws_instance.python_instance.private_ip
   }
+  
+}
 
-  provisioner "remote-exec" {
-    inline = [ 
-      "chmod +x /home/ubuntu/deploy_banco.sh",
-      "/home/ubuntu/deploy_banco.sh"
-    ]
-  }
+data "template_file" "user_data_mysql" {
+  template = file("${path.module}/arquivos/user_data_private.sh.tpl")
+}
+
+data "template_file" "user_data_python" {
+  template = file("${path.module}/arquivos/user_data_private.sh.tpl")
+}
+
+resource "aws_instance" "public_instance" {
+  ami                         = "ami-0f9de6e2d2f067fca"
+  instance_type               = "t2.micro"
+  subnet_id                   = var.public_subnet_id
+  vpc_security_group_ids      = [var.public_sg_id]
+  key_name                    = "Key-Public-01"
+  iam_instance_profile        = "LabInstanceProfile"
+  associate_public_ip_address = true
+  user_data                   = data.template_file.user_data_public.rendered
 
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("./chaves/Key-Private-DB-01.pem")
-    host        = self.private_ip
-    bastion_host        = aws_instance.public_instance_web_server.public_ip
-    bastion_user        = "ubuntu"
-    bastion_private_key = file("./chaves/Key-Public-Front-01.pem")
-  }
-
-  tags = {
-    Name = "private-instance-DB"
-  }
-
-}
-
-resource "aws_instance" "private_instance_api" {
-  ami                  = "ami-04b4f1a9cf54c11d0"
-  instance_type        = "t2.micro"
-  subnet_id            = var.private_subnet_id
-  vpc_security_group_ids = [var.private_sg_api_id]
-  key_name            = "Key-Private-API-01"
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-DB-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-DB-01.pem"    
+    private_key = file("./chaves/Key-Public-01.pem")
+    host        = self.public_ip
   }
 
   provisioner "file" {
-    source      = "./automacoes/deploy_back.sh"
-    destination = "/home/ubuntu/deploy_back.sh"    
+    source      = "./chaves/Key-Private-MYSQL-02.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
+  }
+
+  provisioner "file" {
+    source      = "./chaves/Key-Private-Python-01.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
   }
 
   provisioner "remote-exec" {
-    inline = [ 
-      "chmod +x /home/ubuntu/deploy_back.sh",
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-DB-01.pem",
-      "/home/ubuntu/deploy_back.sh ${aws_instance.private_instance_db.private_ip}"
+    inline = [
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
     ]
   }
+
+  tags = {
+    Name = "public-instance-jenkins"
+  }
+
+  depends_on = [aws_instance.mysql_instance]
+}
+
+resource "aws_instance" "public_instance_monitoramento" {
+  ami                         = "ami-0f9de6e2d2f067fca"
+  instance_type               = "t2.micro"
+  subnet_id                   = var.public_subnet_id
+  vpc_security_group_ids      = [var.public_sg_id]
+  key_name                    = "Key-Public-02"
+  iam_instance_profile        = "LabInstanceProfile"
+  associate_public_ip_address = true
 
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("./chaves/Key-Private-API-01.pem")
-    host        = self.private_ip
-
-    bastion_host        = aws_instance.public_instance_web_server.public_ip
-    bastion_user        = "ubuntu"
-    bastion_private_key = file("./chaves/Key-Public-Front-01.pem")
-  }
-
-  tags = {
-    Name = "private-instance-API"
-  }
-
-  depends_on = [ aws_instance.private_instance_db ]
-}
-
-resource "aws_instance" "public_instance_web_server" {
-  ami                  = "ami-04b4f1a9cf54c11d0"
-  instance_type        = "t2.micro"
-  subnet_id            = var.public_subnet_id
-  vpc_security_group_ids = [var.public_sg_id]
-  key_name            = "Key-Public-Front-01"
-
-  provisioner "file" {
-    source      = "./automacoes/deploy_front.sh"
-    destination = "/home/ubuntu/deploy_front.sh"
+    private_key = file("./chaves/Key-Public-02.pem")
+    host        = self.public_ip
   }
 
   provisioner "file" {
-    source      = "./automacoes/setup_nginx.sh"
-    destination = "/home/ubuntu/setup_nginx.sh"
+    source      = "./chaves/Key-Private-MYSQL-02.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
+  }
+
+  provisioner "file" {
+    source      = "./chaves/Key-Private-Python-01.pem"
+    destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
   }
 
   provisioner "file" {
     source      = "./chaves/Key-Private-API-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-API-01.pem"    
+    destination = "/home/ubuntu/.ssh/Key-Private-API-01.pem"
   }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-DB-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-DB-01.pem"    
-  }
-
-  provisioner "remote-exec" {
-    inline = [ 
-      "chmod +x /home/ubuntu/deploy_front.sh /home/ubuntu/setup_nginx.sh",
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-API-01.pem /home/ubuntu/.ssh/Key-Private-DB-01.pem",
-      "/home/ubuntu/deploy_front.sh"
-    ]
-  }
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("./chaves/Key-Public-Front-01.pem")
-    host        = self.public_ip
-  }
-
-  tags = {
-    Name = "public-instance"
-  }
-}
-
-resource "null_resource" "nginx_configuration" {
-  depends_on = [
-    aws_instance.public_instance_web_server,
-    aws_instance.private_instance_api
-  ]
 
   provisioner "remote-exec" {
     inline = [
-      "/home/ubuntu/setup_nginx.sh ${aws_instance.public_instance_web_server.public_ip} ${aws_instance.private_instance_api.private_ip}"
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-Private-API-01.pem"
     ]
-    
-    connection {
-      type        = "ssh"
-      host        = aws_instance.public_instance_web_server.public_ip
-      user        = "ubuntu" 
-      private_key = file("./chaves/Key-Public-Front-01.pem")
+  }
+
+  tags = {
+    Name = "public-instance-monitoramento"
+  }
+
+  depends_on = [aws_instance.mysql_instance]
+}
+
+resource "aws_instance" "mysql_instance" {
+  ami                    = "ami-0f9de6e2d2f067fca"
+  instance_type          = "t2.micro"
+  subnet_id              = var.private_mysql_subnet_id
+  vpc_security_group_ids = [var.private_sg_database_id]
+  key_name               = "Key-Private-MYSQL-02"
+  iam_instance_profile   = "LabInstanceProfile"
+  user_data = data.template_file.user_data_mysql.rendered
+  tags = {
+    Name = "private-mysql-instance"
+  }
+}
+
+  resource "aws_instance" "python_instance" {
+    ami                    = "ami-0f9de6e2d2f067fca"
+    instance_type          = "t2.micro"
+    subnet_id              = var.private_python_subnet_id
+    vpc_security_group_ids = [var.private_sg_api_id]
+    key_name               = "Key-Private-Python-01"
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.user_data_python.rendered
+
+    tags = {
+      Name = "private-python-instance"
     }
   }
 
-}
+  resource "aws_instance" "api_instance" {
+    ami                    = "ami-0f9de6e2d2f067fca"
+    instance_type          = "t2.micro"
+    subnet_id              = var.private_python_subnet_id
+    vpc_security_group_ids = [var.private_sg_api_id]
+    key_name               = "Key-Private-API-01"
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.user_data_python.rendered
 
-output "db_private_ip" {
-  value = aws_instance.private_instance_db.private_ip
-}
+    tags = {
+      Name = "private-API-instance"
+    }
+  }
 
-output "api_private_ip" {
-  value = aws_instance.private_instance_api.private_ip
-}
+  resource "null_resource" "wait_for_docker_mysql" {
+    depends_on = [aws_instance.public_instance]
 
-output "public_ip" {
-  value = aws_instance.public_instance_web_server.public_ip
-}
+    provisioner "remote-exec" {
+      connection {
+        type                = "ssh"
+        user                = "ubuntu"
+        private_key         = file("./chaves/Key-Private-MYSQL-02.pem")
+        host                = aws_instance.mysql_instance.private_ip
+        bastion_host        = aws_instance.public_instance.public_ip
+        bastion_user        = "ubuntu"
+        bastion_private_key = file("./chaves/Key-Public-01.pem")
+      }
+
+      inline = [
+        "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
+        "echo Docker iniciado com sucesso"
+      ]
+
+    }
+
+  }
+
+  resource "null_resource" "wait_for_docker_python" {
+    depends_on = [aws_instance.public_instance]
+
+    provisioner "remote-exec" {
+      connection {
+        type                = "ssh"
+        user                = "ubuntu"
+        private_key         = file("./chaves/Key-Private-Python-01.pem")
+        host                = aws_instance.python_instance.private_ip
+        bastion_host        = aws_instance.public_instance.public_ip
+        bastion_user        = "ubuntu"
+        bastion_private_key = file("./chaves/Key-Public-01.pem")
+      }
+
+      inline = [
+        "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
+        "echo Docker iniciado com sucesso"
+      ]
+
+    }
+
+  }

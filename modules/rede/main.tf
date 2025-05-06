@@ -2,7 +2,7 @@ resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr_block
 
   tags = {
-    Name = "main-vpc"
+    Name = "TimeSync-vpc"
   }
 }
 
@@ -17,13 +17,23 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_api" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_block
+  cidr_block        = var.private_api_subnet_cidr_block
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet"
+    Name = "private-subnet-apis"
+  }
+}
+
+resource "aws_subnet" "private_mysql" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.private_mysql_subnet_cidr_block
+  availability_zone = var.availability_zone
+
+  tags = {
+    Name = "private-subnet-database"
   }
 }
 
@@ -89,8 +99,13 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private_assoc" {
-  subnet_id      = aws_subnet.private.id
+resource "aws_route_table_association" "private_api_assoc" {
+  subnet_id      = aws_subnet.private_api.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_mysql_assoc" {
+  subnet_id      = aws_subnet.private_mysql.id
   route_table_id = aws_route_table.private.id
 }
 
@@ -111,6 +126,20 @@ resource "aws_security_group" "public_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 993
+    to_port = 993
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
   egress {
     from_port   = 0
     to_port     = 0
@@ -123,49 +152,19 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-resource "aws_security_group" "private_sg_api" {
+resource "aws_security_group" "private_sg_database" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.public_sg.id]
   }
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "private-sg-api"
-  }
-}
-
-resource "aws_security_group" "private_sg_db" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
-  }
-
-  ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
+    ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
     security_groups = [aws_security_group.private_sg_api.id]
   }
 
@@ -177,30 +176,35 @@ resource "aws_security_group" "private_sg_db" {
   }
 
   tags = {
-    Name = "private-sg-db"
+    Name = "private-sg"
   }
 }
 
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
+resource "aws_security_group" "private_sg_api" {
+  vpc_id = aws_vpc.main.id
 
-output "public_subnet_id" {
-  value = aws_subnet.public.id
-}
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.public_sg.id]
+  }
 
-output "private_subnet_id" {
-  value = aws_subnet.private.id
-}
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.public_sg.id]
+  }
 
-output "public_sg_id" {
-  value = aws_security_group.public_sg.id
-}
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-output "private_sg_api_id" {
-  value = aws_security_group.private_sg_api.id
-}
-
-output "private_sg_db_id" {
-  value = aws_security_group.private_sg_db.id
+  tags = {
+    Name = "private-sg"
+  }
 }
