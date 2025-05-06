@@ -7,7 +7,8 @@
 terraform.tfstate
 terraform.tfstate.backup
 crash.log
-
+terraform.tfstate.*
+*.backup
 # Variáveis sensíveis
 *.tfvars
 *.tfvars.json
@@ -20,7 +21,20 @@ plan.out
 terraform.rc
 terraform.tfvars.local
 
+*.backup
+
 # Logs e arquivos temporários
 *.log
 *.bak
 *.swp
+
+modules/maquinas/arquivos/*
+
+# Zips das lambdas
+modules/lambda_functions/code/*.zip
+
+# Diretório temporário de clone
+temp_lambda_code/
+
+.env
+
