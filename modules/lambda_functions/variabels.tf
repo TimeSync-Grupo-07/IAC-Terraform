@@ -21,7 +21,3 @@ variable "raw_topic_arn" {
 variable "account_id" {
   type = string
 }
-
-variable "backup_sns_topic_arn" {
-  type = string
-}

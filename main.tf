@@ -38,15 +38,6 @@ module "acls" {
   depends_on = [ module.maquinas ]
 }
 
-resource "aws_sns_topic" "raw_topic" {
-  name = "raw-processing-topic"
-}
-
-resource "aws_sns_topic_subscription" "email_sub" {
-  topic_arn = aws_sns_topic.raw_topic.arn
-  protocol  = "email"
-  endpoint  = "davi.rsilva@sptech.school"
-}
 module "lambda" {
 
   source = "./modules/lambda_functions"
@@ -56,6 +47,5 @@ module "lambda" {
   trusted_bucket_name = "timesync-trusted-841051091018312111099"
   account_id = "005948301962"
   backup_bucket_name = "timesync-backup-841051091018312111099"
-  raw_topic_arn = aws_sns_topic.raw_topic.arn
-  backup_sns_topic_arn = aws_sns_topic.raw_topic.arn
+  raw_topic_arn = "arn:aws:sns:us-east-1:005948301962:Alerting_sucess_backup"
 }
