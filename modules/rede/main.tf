@@ -1,116 +1,121 @@
-resource "aws_vpc" "main" {
-  cidr_block = var.vpc_cidr_block
+resource "aws_vpc" "timesync-vpc" {
+  cidr_block = var.timesync-vpc-cidr_block
 
   tags = {
-    Name = "TimeSync-vpc"
+    Name = "timesync-vpc"
   }
 }
 
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidr_block
+resource "aws_subnet" "timesync-subrede-publica" {
+  vpc_id                  = aws_vpc.timesync-vpc.id
+  cidr_block              = var.timesync-subrede-publica-cidr_block
   map_public_ip_on_launch = true
   availability_zone       = var.availability_zone
 
   tags = {
-    Name = "public-subnet"
+    Name = "timesync-subrede-publica"
   }
 }
 
-resource "aws_subnet" "private_api" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_api_subnet_cidr_block
+resource "aws_subnet" "timesync-subrede-privada-apps" {
+  vpc_id            = aws_vpc.timesync-vpc.id
+  cidr_block        = var.timesync-subrede-privada-apps-cidr_block
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet-apis"
+    Name = "timesync-subrede-privada-apps"
   }
 }
 
-resource "aws_subnet" "private_mysql" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_mysql_subnet_cidr_block
+resource "aws_subnet" "timesync-subrede-privada-banco_de_dados" {
+  vpc_id            = aws_vpc.timesync-vpc.id
+  cidr_block        = var.timesync-subrede-privada-banco_de_dados-cidr_block
   availability_zone = var.availability_zone
 
   tags = {
-    Name = "private-subnet-database"
+    Name = "timesync-subrede-privada-banco_de_dados"
   }
 }
 
-resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main.id
+resource "aws_internet_gateway" "timesync-gateway-internet" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   tags = {
-    Name = "internet-gateway"
+    Name = "timesync-gateway-internet"
   }
 }
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "tymesync-tabela_de_rotas-publica" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   route {
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     gateway_id = "local"
   }
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
+    gateway_id = aws_internet_gateway.timesync-gateway-internet.id
   }
 
   tags = {
-    Name = "public-route-table"
+    Name = "tymesync-tabela_de_rotas-publica"
   }
 }
 
-resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
+resource "aws_route_table_association" "associacao-tabela_de_rotas-subrede-publica" {
+  subnet_id      = aws_subnet.timesync-subrede-publica.id
+  route_table_id = aws_route_table.tymesync-tabela_de_rotas-publica.id
 }
 
-resource "aws_eip" "nat" {
+resource "aws_eip" "timesync-gateway-ip" {
   domain = "vpc"
-}
-
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public.id
 
   tags = {
-    Name = "nat-gateway"
+    Name = "timesync-gateway-ip"
+  }
+
+}
+
+resource "aws_nat_gateway" "tymesync-gateway-nat" {
+  allocation_id = aws_eip.timesync-gateway-ip.id
+  subnet_id     = aws_subnet.timesync-subrede-publica.id
+
+  tags = {
+    Name = "tymesync-gateway-nat"
   }
 }
 
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "timesync-tabelas_de_rotas-privada" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   route {
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     gateway_id = "local"
   }
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
+    nat_gateway_id = aws_nat_gateway.tymesync-gateway-nat.id
   }
 
   tags = {
-    Name = "private-route-table"
+    Name = "timesync-tabelas_de_rotas-privada"
   }
 }
 
-resource "aws_route_table_association" "private_api_assoc" {
-  subnet_id      = aws_subnet.private_api.id
-  route_table_id = aws_route_table.private.id
+resource "aws_route_table_association" "associacao-tabela_de_rotas-subrede-privada-app" {
+  subnet_id      = aws_subnet.timesync-subrede-privada-apps.id
+  route_table_id = aws_route_table.timesync-tabelas_de_rotas-privada.id
 }
 
-resource "aws_route_table_association" "private_mysql_assoc" {
-  subnet_id      = aws_subnet.private_mysql.id
-  route_table_id = aws_route_table.private.id
+resource "aws_route_table_association" "associacao-tabela_de_rotas-subrede-privada-banco_de_dados" {
+  subnet_id      = aws_subnet.timesync-subrede-privada-banco_de_dados.id
+  route_table_id = aws_route_table.timesync-tabelas_de_rotas-privada.id
 }
 
-resource "aws_security_group" "public_sg" {
-  vpc_id = aws_vpc.main.id
+resource "aws_security_group" "timesync-grupo_de_seguranca-publico-servidor_web" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   ingress {
     from_port   = 22
@@ -148,24 +153,53 @@ resource "aws_security_group" "public_sg" {
   }
 
   tags = {
-    Name = "public-sg"
+    Name = "timesync-grupo_de_seguranca-publico-servidor-web"
   }
 }
 
-resource "aws_security_group" "private_sg_database" {
-  vpc_id = aws_vpc.main.id
+resource "aws_security_group" "timesync-grupo_de_seguranca-publico-central_monitoramento" {
+  vpc_id = aws_vpc.timesync-vpc.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "timesync-grupo_de_seguranca-publico-central_monitoramento"
+  }
+}
+
+resource "aws_security_group" "timesync-grupo_de_seguranca-privado-banco_de_dados" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   ingress {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
   }
     ingress {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.private_sg_api.id]
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-privado-api.id]
   }
 
   egress {
@@ -176,25 +210,25 @@ resource "aws_security_group" "private_sg_database" {
   }
 
   tags = {
-    Name = "private-sg"
+    Name = "timesync-grupo_de_seguranca-privado-banco_de_dados"
   }
 }
 
-resource "aws_security_group" "private_sg_api" {
-  vpc_id = aws_vpc.main.id
+resource "aws_security_group" "timesync-grupo_de_seguranca-privado-api" {
+  vpc_id = aws_vpc.timesync-vpc.id
 
   ingress {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
   }
 
   ingress {
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
   }
 
   egress {
@@ -205,6 +239,35 @@ resource "aws_security_group" "private_sg_api" {
   }
 
   tags = {
-    Name = "private-sg"
+    Name = "timesync-grupo_de_seguranca-privado-api"
+  }
+}
+
+resource "aws_security_group" "timesync-grupo_de_seguranca-privado-transformacao_de_dados" {
+  vpc_id = aws_vpc.timesync-vpc.id
+
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
+  }
+
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "timesync-grupo_de_seguranca-privado-transformacao_de_dados"
   }
 }

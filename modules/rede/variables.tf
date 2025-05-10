@@ -1,13 +1,14 @@
-variable "vpc_cidr_block" {
+
+variable "timesync-vpc-cidr_block" {
   type = string
 }
-variable "public_subnet_cidr_block" {
+variable "timesync-subrede-publica-cidr_block" {
   type = string
 }
-variable "private_api_subnet_cidr_block" {
+variable "timesync-subrede-privada-apps-cidr_block" {
   type = string
 }
-variable "private_mysql_subnet_cidr_block" {
+variable "timesync-subrede-privada-banco_de_dados-cidr_block" {
   type = string
 }
 variable "availability_zone" {
