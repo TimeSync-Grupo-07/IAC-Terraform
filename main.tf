@@ -33,12 +33,12 @@ module "maquinas" {
 
 module "acls" {
   source                     = "./modules/acls"
-  
-  vpc_id                     = module.rede.vpc_id
-  vpc_cidr_block             = module.rede.vpc_cidr_block
-  public_subnet_id           = module.rede.public_subnet_id
-  private_python_subnet_id   = module.rede.private_python_subnet_id
-  private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
+
+  timesync-vpc-id = module.rede.timesync-vpc-id
+  timesync-vpc-cidr_block = module.rede.timesync-vpc-cidr_block
+  timesync-subrede-publica-id = module.rede.timesync-subrede-publica-id
+  timesync-subrede-privada-apps-id = module.rede.timesync-subrede-privada-apps-id
+  timesync-subrede-privada-banco_de_dados-id = module.rede.timesync-subrede-privada-banco_de_dados-id
 
   depends_on = [ module.maquinas ]
 }

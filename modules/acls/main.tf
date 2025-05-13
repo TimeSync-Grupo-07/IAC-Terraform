@@ -1,6 +1,6 @@
 
-resource "aws_network_acl" "public" {
-  vpc_id = var.vpc_id
+resource "aws_network_acl" "timesync-network_acess_control_list-publica" {
+  vpc_id = var.timesync-vpc-id
 
   # Entrada
   ingress {
@@ -71,15 +71,15 @@ resource "aws_network_acl" "public" {
   }
 }
 
-resource "aws_network_acl" "private_1" {
-  vpc_id = var.vpc_id
+resource "aws_network_acl" "timesync-network_acess_control_list-privada-apps" {
+  vpc_id = var.timesync-vpc-id
 
   # Entrada da própria VPC
   ingress {
     protocol   = "tcp"
     rule_no    = 100
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 22
     to_port    = 22
   }
@@ -88,7 +88,7 @@ resource "aws_network_acl" "private_1" {
     protocol   = "tcp"
     rule_no    = 102
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 8080
     to_port    = 8080
   }
@@ -97,7 +97,7 @@ resource "aws_network_acl" "private_1" {
     protocol   = "-1"
     rule_no    = 200
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 0
     to_port    = 0
   }
@@ -107,13 +107,13 @@ resource "aws_network_acl" "private_1" {
   }
 }
 
-resource "aws_network_acl" "private_2" {
-  vpc_id = var.vpc_id
+resource "aws_network_acl" "timesync-network_acess_control_list-privada-banco_de_dados" {
+  vpc_id = var.timesync-vpc-id
   ingress {
     protocol   = "tcp"
     rule_no    = 100
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 22
     to_port    = 22
   }
@@ -122,7 +122,7 @@ resource "aws_network_acl" "private_2" {
     protocol   = "tcp"
     rule_no    = 102
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 3306
     to_port    = 3306
   }
@@ -131,7 +131,7 @@ resource "aws_network_acl" "private_2" {
     protocol   = "-1"
     rule_no    = 200
     action     = "allow"
-    cidr_block = var.vpc_cidr_block
+    cidr_block = var.timesync-vpc-cidr_block
     from_port  = 0
     to_port    = 0
   }
@@ -142,17 +142,17 @@ resource "aws_network_acl" "private_2" {
 }
 
 # Associações
-resource "aws_network_acl_association" "public" {
-  subnet_id      = var.public_subnet_id
-  network_acl_id = aws_network_acl.public.id
+resource "aws_network_acl_association" "timesync-associacao-network_acess_control_list-publica" {
+  subnet_id      = var.timesync-subrede-publica-id
+  network_acl_id = aws_network_acl.timesync-network_acess_control_list-publica.id
 }
 
-resource "aws_network_acl_association" "private_python" {
-  subnet_id      = var.private_python_subnet_id
-  network_acl_id = aws_network_acl.private_1.id
+resource "aws_network_acl_association" "timesync-associacao-network_acess_control_list-privada-apps" {
+  subnet_id      = var.timesync-subrede-privada-apps-id
+  network_acl_id = aws_network_acl.timesync-network_acess_control_list-privada-apps.id
 }
 
-resource "aws_network_acl_association" "private_mysql" {
-  subnet_id      = var.private_mysql_subnet_id
-  network_acl_id = aws_network_acl.private_2.id
+resource "aws_network_acl_association" "timesync-associacao-network_acess_control_list-privada-banco_de_dados" {
+  subnet_id      = var.timesync-subrede-privada-banco_de_dados-id
+  network_acl_id = aws_network_acl.timesync-network_acess_control_list-privada-banco_de_dados.id
 }
