@@ -1,28 +1,39 @@
-variable "vpc_id" {
+variable "timesync-vpc-id" {
   type = string
 }
 
-variable "public_subnet_id" {
+variable "timesync-subrede-publica-id" {
   type = string
 }
 
-variable "private_python_subnet_id" {
+variable "timesync-subrede-privada-apps-id" {
   type = string
 }
 
-variable "private_mysql_subnet_id" {
+variable "timesync-subrede-privada-banco_de_dados-id" {
   type = string
 }
 
-variable "public_sg_id" {
+variable "timesync-ami-padrao"{
   type = string
 }
 
-variable "private_sg_database_id" {
+variable "timesync-grupo_de_seguranca-publico-servidor_web-id" {
   type = string
 }
 
-variable "private_sg_api_id" {
+variable "timesync-grupo_de_seguranca-publico-central_monitoramento-id" {
   type = string
 }
 
+variable "timesync-grupo_de_seguranca-privado-banco_de_dados-id" {
+  type = string
+}
+
+variable "timesync-grupo_de_seguranca-privado-transformacao_de_dados-id" {
+  type = string
+}
+
+variable "timesync-grupo_de_seguranca-privado-api-id" {
+  type = string
+}

@@ -45,7 +45,7 @@ resource "aws_internet_gateway" "timesync-gateway-internet" {
   }
 }
 
-resource "aws_route_table" "tymesync-tabela_de_rotas-publica" {
+resource "aws_route_table" "timesync-tabela_de_rotas-publica" {
   vpc_id = aws_vpc.timesync-vpc.id
 
   route {
@@ -59,13 +59,13 @@ resource "aws_route_table" "tymesync-tabela_de_rotas-publica" {
   }
 
   tags = {
-    Name = "tymesync-tabela_de_rotas-publica"
+    Name = "timesync-tabela_de_rotas-publica"
   }
 }
 
 resource "aws_route_table_association" "associacao-tabela_de_rotas-subrede-publica" {
   subnet_id      = aws_subnet.timesync-subrede-publica.id
-  route_table_id = aws_route_table.tymesync-tabela_de_rotas-publica.id
+  route_table_id = aws_route_table.timesync-tabela_de_rotas-publica.id
 }
 
 resource "aws_eip" "timesync-gateway-ip" {
@@ -77,12 +77,12 @@ resource "aws_eip" "timesync-gateway-ip" {
 
 }
 
-resource "aws_nat_gateway" "tymesync-gateway-nat" {
+resource "aws_nat_gateway" "timesync-gateway-nat" {
   allocation_id = aws_eip.timesync-gateway-ip.id
   subnet_id     = aws_subnet.timesync-subrede-publica.id
 
   tags = {
-    Name = "tymesync-gateway-nat"
+    Name = "timesync-gateway-nat"
   }
 }
 
@@ -96,7 +96,7 @@ resource "aws_route_table" "timesync-tabelas_de_rotas-privada" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.tymesync-gateway-nat.id
+    nat_gateway_id = aws_nat_gateway.timesync-gateway-nat.id
   }
 
   tags = {

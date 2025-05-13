@@ -30,6 +30,13 @@ resource "aws_lambda_function" "notification_team" {
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
+
+  environment {
+    variables = {
+      SNS_TOPIC_ARN = var.raw_topic_arn
+    }
+  }
+
 }
 
 resource "aws_lambda_function" "process_trusted_lambda" {

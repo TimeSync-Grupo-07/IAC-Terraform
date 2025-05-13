@@ -5,30 +5,35 @@ provider "aws" {
 module "rede" {
   source = "./modules/rede"
 
-  vpc_cidr_block           = "10.0.0.0/23"
-  public_subnet_cidr_block = "10.0.0.0/24"
-  private_api_subnet_cidr_block = "10.0.1.0/25"
-  private_mysql_subnet_cidr_block = "10.0.1.128/25"
-  availability_zone        = "us-east-1a"
+  timesync-vpc-cidr_block = "10.0.0.0/23"
+  timesync-subrede-publica-cidr_block = "10.0.0.0/24"
+  timesync-subrede-privada-apps-cidr_block = "10.0.1.0/25"
+  timesync-subrede-privada-banco_de_dados-cidr_block = "10.0.1.128/25"
+  availability_zone = "us-east-1a"
+
 }
 
 module "maquinas" {
 
   depends_on = [ module.rede ]
 
-  source                     = "./modules/maquinas"
+  source = "./modules/maquinas"
 
-  vpc_id = module.rede.vpc_id
-  public_subnet_id           = module.rede.public_subnet_id
-  private_python_subnet_id   = module.rede.private_python_subnet_id
-  private_mysql_subnet_id    = module.rede.private_mysql_subnet_id
-  public_sg_id               = module.rede.public_sg_id
-  private_sg_api_id          = module.rede.private_sg_api_id
-  private_sg_database_id     = module.rede.private_sg_database_id
+  timesync-vpc-id = module.rede.timesync-vpc-id
+  timesync-subrede-publica-id = module.rede.timesync-subrede-publica-id
+  timesync-subrede-privada-apps-id = module.rede.timesync-subrede-privada-apps-id
+  timesync-subrede-privada-banco_de_dados-id = module.rede.timesync-subrede-privada-banco_de_dados-id
+  timesync-ami-padrao = "ami-0f9de6e2d2f067fca"
+  timesync-grupo_de_seguranca-publico-servidor_web-id = module.rede.timesync-grupo_de_seguranca-publico-servidor_web-id
+  timesync-grupo_de_seguranca-publico-central_monitoramento-id = module.rede.timesync-grupo_de_seguranca-publico-central_monitoramento-id
+  timesync-grupo_de_seguranca-privado-banco_de_dados-id = module.rede.timesync-grupo_de_seguranca-privado-banco_de_dados-id
+  timesync-grupo_de_seguranca-privado-transformacao_de_dados-id = module.rede.timesync-grupo_de_seguranca-privado-transformacao_de_dados-id
+  timesync-grupo_de_seguranca-privado-api-id = module.rede.timesync-grupo_de_seguranca-privado-api-id
 }
 
 module "acls" {
   source                     = "./modules/acls"
+  
   vpc_id                     = module.rede.vpc_id
   vpc_cidr_block             = module.rede.vpc_cidr_block
   public_subnet_id           = module.rede.public_subnet_id
@@ -38,14 +43,14 @@ module "acls" {
   depends_on = [ module.maquinas ]
 }
 
-module "lambda" {
+# module "lambda" {
 
-  source = "./modules/lambda_functions"
+#   source = "./modules/lambda_functions"
 
-  private_subnet_ids = [module.rede.private_python_subnet_id,module.rede.private_mysql_subnet_id]
-  raw_bucket_name = "timesync-raw-841051091018312111099"
-  trusted_bucket_name = "timesync-trusted-841051091018312111099"
-  account_id = "005948301962"
-  backup_bucket_name = "timesync-backup-841051091018312111099"
-  raw_topic_arn = "arn:aws:sns:us-east-1:005948301962:Alerting_sucess_backup"
-}
+#   private_subnet_ids = [module.rede.private_python_subnet_id,module.rede.private_mysql_subnet_id]
+#   raw_bucket_name = "timesync-raw-841051091018312111099"
+#   trusted_bucket_name = "timesync-trusted-841051091018312111099"
+#   account_id = "005948301962"
+#   backup_bucket_name = "timesync-backup-841051091018312111099"
+#   raw_topic_arn = "arn:aws:sns:us-east-1:005948301962:Alerting_sucess_backup"
+# }

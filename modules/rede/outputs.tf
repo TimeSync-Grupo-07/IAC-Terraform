@@ -2,7 +2,7 @@ output "timesync-vpc-id" {
   value = aws_vpc.timesync-vpc.id
 }
 
-output "timesync-vp-cidr_block" {
+output "timesync-vpc-cidr_block" {
   value = aws_vpc.timesync-vpc.cidr_block
 }
 
@@ -30,10 +30,14 @@ output "timesync-grupo_de_seguranca-publico-central_monitoramento-id" {
   value = aws_security_group.timesync-grupo_de_seguranca-publico-central_monitoramento.id
 }
 
-output "timesync-grupo_de_seguranca-api-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-api.id
+output "timesync-grupo_de_seguranca-privado-api-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-privado-api.id
 }
 
-output "timesync-grupo_de_seguranca-banco_de_dados-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-banco_de_dados.id
+output "timesync-grupo_de_seguranca-privado-banco_de_dados-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-privado-banco_de_dados.id
+}
+
+output "timesync-grupo_de_seguranca-privado-transformacao_de_dados-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-privado-transformacao_de_dados.id
 }
