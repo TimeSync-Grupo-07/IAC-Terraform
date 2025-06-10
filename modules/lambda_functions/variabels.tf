@@ -1,23 +1,21 @@
-variable "private_subnet_ids" {
-  type = list(string)
-}
 
-variable "raw_bucket_name" {
+
+variable "timesync-bucket-raw-bucket_name" {
   type = string
 }
 
-variable "trusted_bucket_name" {
+variable "timesync-bucket-trusted-bucket_name" {
   type = string
 }
 
-variable "backup_bucket_name" {
+variable "timesync-bucket-backup-bucket_name" {
   type = string
 }
 
-variable "raw_topic_arn" {
+variable "timesync-sns-topico-information-arn" {
   type = string
 }
 
-variable "account_id" {
+variable "timesync-administrador-conta-id" {
   type = string
 }

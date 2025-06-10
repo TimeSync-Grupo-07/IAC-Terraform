@@ -141,7 +141,6 @@ resource "aws_network_acl" "timesync-network_acess_control_list-privada-banco_de
   }
 }
 
-# Associações
 resource "aws_network_acl_association" "timesync-associacao-network_acess_control_list-publica" {
   subnet_id      = var.timesync-subrede-publica-id
   network_acl_id = aws_network_acl.timesync-network_acess_control_list-publica.id

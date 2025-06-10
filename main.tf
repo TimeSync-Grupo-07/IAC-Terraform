@@ -43,14 +43,30 @@ module "acls" {
   depends_on = [ module.maquinas ]
 }
 
-# module "lambda" {
+module "s3" {
+  
+  source = "./modules/s3"
 
-#   source = "./modules/lambda_functions"
+}
 
-#   private_subnet_ids = [module.rede.private_python_subnet_id,module.rede.private_mysql_subnet_id]
-#   raw_bucket_name = "timesync-raw-841051091018312111099"
-#   trusted_bucket_name = "timesync-trusted-841051091018312111099"
-#   account_id = "005948301962"
-#   backup_bucket_name = "timesync-backup-841051091018312111099"
-#   raw_topic_arn = "arn:aws:sns:us-east-1:005948301962:Alerting_sucess_backup"
-# }
+module "sns" {
+  
+  source = "./modules/sns"
+  
+  # lista_email_equipe = ["davi.rsilva@sptech.school","paulo.cafasso@sptech.school","giovanna.arodrigues@sptech.school","marcos.feu@sptech.school","rita.barbosa@sptech.school"]
+  lista_email_equipe = ["davi.rsilva@sptech.school"]
+
+}
+
+module "lambda" {
+
+  source = "./modules/lambda_functions"
+
+  timesync-bucket-raw-bucket_name = module.s3.bucket_arn_raw
+  timesync-bucket-trusted-bucket_name = module.s3.bucket_arn_trusted
+  timesync-bucket-backup-bucket_name = module.s3.bucket_arn_backup
+  timesync-sns-topico-information-arn = module.sns.timesync-notification_service-privado-topico-arn
+  timesync-administrador-conta-id = "005948301962"
+
+}
+
