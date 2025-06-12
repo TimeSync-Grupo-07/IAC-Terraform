@@ -58,6 +58,10 @@ module "sns" {
 
 }
 
+module "api_gtw" {
+  source = "./modules/api_gtw"
+}
+
 module "lambda" {
 
   source = "./modules/lambda_functions"

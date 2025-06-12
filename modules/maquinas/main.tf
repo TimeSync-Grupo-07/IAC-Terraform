@@ -35,6 +35,12 @@ resource "aws_instance" "timesync-instancia-publica-servidor_web" {
   associate_public_ip_address = true
   user_data = data.template_file.timesync-arquivo_de_inicializacao-servidor_web.rendered
 
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
   connection {
     type        = "ssh"
     user        = "ubuntu"
@@ -82,6 +88,12 @@ resource "aws_instance" "timesync-instancia-publica-central_monitoramento" {
   associate_public_ip_address = true
   user_data = data.template_file.timesync-arquivo_de_inicializacao-central_monitoramento.rendered
 
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
   connection {
     type        = "ssh"
     user        = "ubuntu"
@@ -127,9 +139,17 @@ resource "aws_instance" "timesync-instancia-privada-banco_de_dados" {
   key_name               = aws_key_pair.timesync-chave-private-banco_de_dados.key_name
   iam_instance_profile   = "LabInstanceProfile"
   user_data = data.template_file.timesync-arquivo_de_inicializacao-banco_de_dados.rendered
+  
   tags = {
     Name = "timesync-instancia-privada-banco_de_dados"
   }
+
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
 }
 
   resource "aws_instance" "timesync-instancia-privada-transformacao_de_dados" {
@@ -140,6 +160,12 @@ resource "aws_instance" "timesync-instancia-privada-banco_de_dados" {
     key_name               = aws_key_pair.timesync-chave-private-transformacao_de_dados.key_name
     iam_instance_profile   = "LabInstanceProfile"
     user_data = data.template_file.timesync-arquivo_de_inicializacao-transformacao_de_dados.rendered
+
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_size = 30
+      volume_type = "standart"
+    }
 
     tags = {
       Name = "timesync-instancia-privada-transformacao_de_dados"
@@ -154,6 +180,12 @@ resource "aws_instance" "timesync-instancia-privada-banco_de_dados" {
     key_name               = aws_key_pair.timesync-chave-private-api.key_name
     iam_instance_profile   = "LabInstanceProfile"
     user_data = data.template_file.timesync-arquivo_de_inicializacao-api.rendered
+
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_size = 30
+      volume_type = "standart"
+    }
 
     tags = {
       Name = "timesync-instancia-privada-api"

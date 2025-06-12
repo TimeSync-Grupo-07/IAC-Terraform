@@ -77,7 +77,7 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-process_trusted_d
   bucket = var.timesync-bucket-trusted-bucket_name
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.timesync-lambda-function-process_backup_data.arn
+    lambda_function_arn = aws_lambda_function.timesync-lambda-function-process_trusted_data.arn
     events              = ["s3:ObjectCreated:*"]
     filter_suffix       = ".csv"
   }
