@@ -1,161 +1,234 @@
 
-data "template_file" "user_data_public" {
-  template = file("${path.module}/arquivos/user_data_node.sh.tpl")
+
+resource "aws_key_pair" "timesync-chave-public-servidor_web" {
+  key_name = "Key-public-servidor_web"
+  public_key = file("${path.module}/chaves/Key-public-servidor_web.pem.pub")
+}
+
+resource "aws_key_pair" "timesync-chave-public-central_monitoramento" {
+  key_name = "Key-public-central_monitoramento"
+  public_key = file("${path.module}/chaves/Key-public-central_monitoramento.pem.pub")
+}
+
+resource "aws_key_pair" "timesync-chave-private-api" {
+  key_name = "Key-private-api"
+  public_key = file("${path.module}/chaves/Key-private-api.pem.pub")
+}
+
+resource "aws_key_pair" "timesync-chave-private-banco_de_dados" {
+  key_name = "Key-private-banco_de_dados"
+  public_key = file("${path.module}/chaves/Key-private-banco_de_dados.pem.pub")
+}
+
+resource "aws_key_pair" "timesync-chave-private-transformacao_de_dados" {
+  key_name = "Key-private-transformacao_de_dados"
+  public_key = file("${path.module}/chaves/Key-private-transformacao_de_dados.pem.pub")
+}
+
+resource "aws_instance" "timesync-instancia-publica-servidor_web" {
+  ami                         = var.timesync-ami-padrao
+  instance_type               = "t2.micro"
+  subnet_id                   = var.timesync-subrede-publica-id
+  vpc_security_group_ids      = [var.timesync-grupo_de_seguranca-publico-servidor_web-id]
+  key_name                    = aws_key_pair.timesync-chave-public-servidor_web.key_name
+  iam_instance_profile        = "LabInstanceProfile"
+  associate_public_ip_address = true
+  user_data = data.template_file.timesync-arquivo_de_inicializacao-servidor_web.rendered
+
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("${path.module}/chaves/Key-public-servidor_web.pem")
+    host        = self.public_ip
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-banco_de_dados.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-banco_de_dados.pem"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-transformacao_de_dados.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-transformacao_de_dados.pem"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-api.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-api.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 400 /home/ubuntu/.ssh/Key-private-banco_de_dados.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-private-transformacao_de_dados.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-private-api.pem"
+    ]
+  }
+
+  tags = {
+    Name = "timesync-instancia-publica-servidor_web"
+  }
+
+  depends_on = [aws_instance.timesync-instancia-privada-banco_de_dados]
+}
+
+resource "aws_instance" "timesync-instancia-publica-central_monitoramento" {
+  ami                         = var.timesync-ami-padrao
+  instance_type               = "t2.micro"
+  subnet_id                   = var.timesync-subrede-publica-id
+  vpc_security_group_ids      = [var.timesync-grupo_de_seguranca-publico-central_monitoramento-id]
+  key_name                    = aws_key_pair.timesync-chave-public-central_monitoramento.key_name
+  iam_instance_profile        = "LabInstanceProfile"
+  associate_public_ip_address = true
+  user_data = data.template_file.timesync-arquivo_de_inicializacao-central_monitoramento.rendered
+
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("${path.module}/chaves/Key-public-central_monitoramento.pem")
+    host        = self.public_ip
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-banco_de_dados.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-banco_de_dados.pem"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-transformacao_de_dados.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-transformacao_de_dados.pem"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/chaves/Key-private-api.pem"
+    destination = "/home/ubuntu/.ssh/Key-private-api.pem"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 400 /home/ubuntu/.ssh/Key-private-banco_de_dados.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-private-transformacao_de_dados.pem",
+      "chmod 400 /home/ubuntu/.ssh/Key-private-api.pem"
+    ]
+  }
+
+  tags = {
+    Name = "timesync-instancia-publica-central_monitoramento"
+  }
+
+  depends_on = [aws_instance.timesync-instancia-privada-banco_de_dados]
+}
+
+resource "aws_instance" "timesync-instancia-privada-banco_de_dados" {
+  ami                    = var.timesync-ami-padrao
+  instance_type          = "t2.micro"
+  subnet_id              = var.timesync-subrede-privada-banco_de_dados-id
+  vpc_security_group_ids = [var.timesync-grupo_de_seguranca-privado-banco_de_dados-id]
+  key_name               = aws_key_pair.timesync-chave-private-banco_de_dados.key_name
+  iam_instance_profile   = "LabInstanceProfile"
+  user_data = data.template_file.timesync-arquivo_de_inicializacao-banco_de_dados.rendered
+  
+  tags = {
+    Name = "timesync-instancia-privada-banco_de_dados"
+  }
+
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 30
+    volume_type = "standart"
+  }
+
+}
+
+  resource "aws_instance" "timesync-instancia-privada-transformacao_de_dados" {
+    ami                    = var.timesync-ami-padrao
+    instance_type          = "t2.micro"
+    subnet_id              = var.timesync-subrede-privada-apps-id
+    vpc_security_group_ids = [var.timesync-grupo_de_seguranca-privado-transformacao_de_dados-id]
+    key_name               = aws_key_pair.timesync-chave-private-transformacao_de_dados.key_name
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.timesync-arquivo_de_inicializacao-transformacao_de_dados.rendered
+
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_size = 30
+      volume_type = "standart"
+    }
+
+    tags = {
+      Name = "timesync-instancia-privada-transformacao_de_dados"
+    }
+  }
+
+  resource "aws_instance" "timesync-instancia-privada-api" {
+    ami                    = var.timesync-ami-padrao
+    instance_type          = "t2.micro"
+    subnet_id              = var.timesync-subrede-privada-apps-id
+    vpc_security_group_ids = [var.timesync-grupo_de_seguranca-privado-api-id]
+    key_name               = aws_key_pair.timesync-chave-private-api.key_name
+    iam_instance_profile   = "LabInstanceProfile"
+    user_data = data.template_file.timesync-arquivo_de_inicializacao-api.rendered
+
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_size = 30
+      volume_type = "standart"
+    }
+
+    tags = {
+      Name = "timesync-instancia-privada-api"
+    }
+  }
+
+data "template_file" "timesync-arquivo_de_inicializacao-servidor_web" {
+  template = file("${path.module}/arquivos/user_data_public_servidor_web.sh.tpl")
   vars = {
-    DB_HOST = aws_instance.mysql_instance.private_ip
-    PYTHON_HOST = aws_instance.python_instance.private_ip
+    DB_HOST = aws_instance.timesync-instancia-privada-banco_de_dados.private_ip,
+    PYTHON_HOST = aws_instance.timesync-instancia-privada-transformacao_de_dados.private_ip
   }
   
 }
 
-data "template_file" "user_data_mysql" {
-  template = file("${path.module}/arquivos/user_data_private.sh.tpl")
+data "template_file" "timesync-arquivo_de_inicializacao-central_monitoramento" {
+  template = file("${path.module}/arquivos/user_data_public_central_monitoramento.sh.tpl")
 }
 
-data "template_file" "user_data_python" {
-  template = file("${path.module}/arquivos/user_data_private.sh.tpl")
+data "template_file" "timesync-arquivo_de_inicializacao-banco_de_dados" {
+  template = file("${path.module}/arquivos/user_data_private_banco_de_dados.sh.tpl")
 }
 
-resource "aws_instance" "public_instance" {
-  ami                         = "ami-0f9de6e2d2f067fca"
-  instance_type               = "t2.micro"
-  subnet_id                   = var.public_subnet_id
-  vpc_security_group_ids      = [var.public_sg_id]
-  key_name                    = "Key-Public-01"
-  iam_instance_profile        = "LabInstanceProfile"
-  associate_public_ip_address = true
-  user_data                   = data.template_file.user_data_public.rendered
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("./chaves/Key-Public-01.pem")
-    host        = self.public_ip
-  }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-MYSQL-02.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
-  }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-Python-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
-    ]
-  }
-
-  tags = {
-    Name = "public-instance-jenkins"
-  }
-
-  depends_on = [aws_instance.mysql_instance]
+data "template_file" "timesync-arquivo_de_inicializacao-api" {
+  template = file("${path.module}/arquivos/user_data_private_api.sh.tpl")
 }
 
-resource "aws_instance" "public_instance_monitoramento" {
-  ami                         = "ami-0f9de6e2d2f067fca"
-  instance_type               = "t2.micro"
-  subnet_id                   = var.public_subnet_id
-  vpc_security_group_ids      = [var.public_sg_id]
-  key_name                    = "Key-Public-02"
-  iam_instance_profile        = "LabInstanceProfile"
-  associate_public_ip_address = true
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("./chaves/Key-Public-02.pem")
-    host        = self.public_ip
-  }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-MYSQL-02.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-MYSQL-02.pem"
-  }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-Python-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-Python-01.pem"
-  }
-
-  provisioner "file" {
-    source      = "./chaves/Key-Private-API-01.pem"
-    destination = "/home/ubuntu/.ssh/Key-Private-API-01.pem"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-Python-01.pem",
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-MYSQL-02.pem",
-      "chmod 400 /home/ubuntu/.ssh/Key-Private-API-01.pem"
-    ]
-  }
-
-  tags = {
-    Name = "public-instance-monitoramento"
-  }
-
-  depends_on = [aws_instance.mysql_instance]
+data "template_file" "timesync-arquivo_de_inicializacao-transformacao_de_dados" {
+  template = file("${path.module}/arquivos/user_data_private_transformacao_de_dados.sh.tpl")
 }
 
-resource "aws_instance" "mysql_instance" {
-  ami                    = "ami-0f9de6e2d2f067fca"
-  instance_type          = "t2.micro"
-  subnet_id              = var.private_mysql_subnet_id
-  vpc_security_group_ids = [var.private_sg_database_id]
-  key_name               = "Key-Private-MYSQL-02"
-  iam_instance_profile   = "LabInstanceProfile"
-  user_data = data.template_file.user_data_mysql.rendered
-  tags = {
-    Name = "private-mysql-instance"
-  }
-}
-
-  resource "aws_instance" "python_instance" {
-    ami                    = "ami-0f9de6e2d2f067fca"
-    instance_type          = "t2.micro"
-    subnet_id              = var.private_python_subnet_id
-    vpc_security_group_ids = [var.private_sg_api_id]
-    key_name               = "Key-Private-Python-01"
-    iam_instance_profile   = "LabInstanceProfile"
-    user_data = data.template_file.user_data_python.rendered
-
-    tags = {
-      Name = "private-python-instance"
-    }
-  }
-
-  resource "aws_instance" "api_instance" {
-    ami                    = "ami-0f9de6e2d2f067fca"
-    instance_type          = "t2.micro"
-    subnet_id              = var.private_python_subnet_id
-    vpc_security_group_ids = [var.private_sg_api_id]
-    key_name               = "Key-Private-API-01"
-    iam_instance_profile   = "LabInstanceProfile"
-    user_data = data.template_file.user_data_python.rendered
-
-    tags = {
-      Name = "private-API-instance"
-    }
-  }
-
-  resource "null_resource" "wait_for_docker_mysql" {
-    depends_on = [aws_instance.public_instance]
+  resource "null_resource" "verificacao-instalacao-docker-banco_de_dados" {
+    depends_on = [aws_instance.timesync-instancia-publica-servidor_web]
 
     provisioner "remote-exec" {
       connection {
         type                = "ssh"
         user                = "ubuntu"
-        private_key         = file("./chaves/Key-Private-MYSQL-02.pem")
-        host                = aws_instance.mysql_instance.private_ip
-        bastion_host        = aws_instance.public_instance.public_ip
+        private_key         = file("${path.module}/chaves/Key-private-banco_de_dados.pem")
+        host                = aws_instance.timesync-instancia-privada-banco_de_dados.private_ip
+        bastion_host        = aws_instance.timesync-instancia-publica-servidor_web.public_ip
         bastion_user        = "ubuntu"
-        bastion_private_key = file("./chaves/Key-Public-01.pem")
+        bastion_private_key = file("${path.module}/chaves/Key-public-servidor_web.pem")
       }
 
       inline = [
@@ -167,18 +240,18 @@ resource "aws_instance" "mysql_instance" {
 
   }
 
-  resource "null_resource" "wait_for_docker_python" {
-    depends_on = [aws_instance.public_instance]
+  resource "null_resource" "verificacao-instalacao-docker-tranformacao_de_dados" {
+    depends_on = [aws_instance.timesync-instancia-publica-servidor_web]
 
     provisioner "remote-exec" {
       connection {
         type                = "ssh"
         user                = "ubuntu"
-        private_key         = file("./chaves/Key-Private-Python-01.pem")
-        host                = aws_instance.python_instance.private_ip
-        bastion_host        = aws_instance.public_instance.public_ip
+        private_key         = file("${path.module}/chaves/Key-private-transformacao_de_dados.pem")
+        host                = aws_instance.timesync-instancia-privada-transformacao_de_dados.private_ip
+        bastion_host        = aws_instance.timesync-instancia-publica-servidor_web.public_ip
         bastion_user        = "ubuntu"
-        bastion_private_key = file("./chaves/Key-Public-01.pem")
+        bastion_private_key = file("${path.module}/chaves/Key-public-servidor_web.pem")
       }
 
       inline = [
@@ -189,3 +262,24 @@ resource "aws_instance" "mysql_instance" {
     }
 
   }
+
+  resource "null_resource" "verificacao-instalacao-docker-servidor_web" {
+    depends_on = [aws_instance.timesync-instancia-publica-servidor_web]
+
+    provisioner "remote-exec" {
+      connection {
+        type                = "ssh"
+        user                = "ubuntu"
+        private_key         = file("${path.module}/chaves/Key-public-servidor_web.pem")
+        host                = aws_instance.timesync-instancia-publica-servidor_web.public_ip
+      }
+
+      inline = [
+        "while ! systemctl is-active docker; do echo 'Esperando Docker subir...'; sleep 5; done",
+        "echo Docker iniciado com sucesso"
+      ]
+
+    }
+
+  }
+

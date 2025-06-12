@@ -1,11 +1,11 @@
-output "public_acl_id" {
-  value = aws_network_acl.public.id
+output "timesync-network_acess_control_list-publica-id" {
+  value = aws_network_acl.timesync-network_acess_control_list-publica.id
 }
 
-output "private_acl_id_1" {
-  value = aws_network_acl.private_1.id
+output "timesync-network_acess_control_list-privada-apps-id" {
+  value = aws_network_acl.timesync-network_acess_control_list-privada-apps.id
 }
 
-output "private_acl_id_2" {
-  value = aws_network_acl.private_2.id
+output "timesync-network_acess_control_list-privada-banco_de_dados-id" {
+  value = aws_network_acl.timesync-network_acess_control_list-privada-banco_de_dados.id
 }

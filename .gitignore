@@ -1,4 +1,4 @@
-/chaves/*
+modules/maquinas/chaves/*
 
 # Diretórios e arquivos do Terraform
 .terraform/

@@ -1,18 +1,18 @@
-variable "vpc_id" {
+variable "timesync-vpc-id" {
   type = string
 }
 
-variable "vpc_cidr_block" {
+variable "timesync-vpc-cidr_block" {
   type = string
 }
 
-variable "public_subnet_id" {
+variable "timesync-subrede-publica-id" {
   type = string
 }
 
-variable "private_python_subnet_id" {
+variable "timesync-subrede-privada-apps-id" {
   type = string
 }
-variable "private_mysql_subnet_id" {
+variable "timesync-subrede-privada-banco_de_dados-id" {
   type = string
 }
