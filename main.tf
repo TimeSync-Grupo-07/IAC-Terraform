@@ -58,9 +58,9 @@ module "sns" {
 
 }
 
-module "api_gtw" {
-  source = "./modules/api_gtw"
-}
+# module "api_gtw" {
+#   source = "./modules/api_gtw"
+# }
 
 module "lambda" {
 
@@ -70,7 +70,7 @@ module "lambda" {
   timesync-bucket-trusted-bucket_name = module.s3.bucket_arn_trusted
   timesync-bucket-backup-bucket_name = module.s3.bucket_arn_backup
   timesync-sns-topico-information-arn = module.sns.timesync-notification_service-privado-topico-arn
-  timesync-administrador-conta-id = "005948301962"
+  timesync-administrador-conta-id = "562681233141"
 
 }
 

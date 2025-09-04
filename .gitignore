@@ -1,4 +1,3 @@
-modules/maquinas/chaves/*
 
 # Diretórios e arquivos do Terraform
 .terraform/
@@ -27,14 +26,6 @@ terraform.tfvars.local
 *.log
 *.bak
 *.swp
-
-modules/maquinas/arquivos/*
-
-# Zips das lambdas
-modules/lambda_functions/code/*.zip
-
-# Diretório temporário de clone
-temp_lambda_code/
 
 .env
 

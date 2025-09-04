@@ -5,7 +5,7 @@ resource "aws_lambda_layer_version" "timesync-lambda-layer-mysql_connector" {
 }
 
 resource "aws_lambda_function" "timesync-lambda-function-process_raw_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
+  filename      = "${path.module}/code/codigo_padrao.zip"
   function_name = "timesync-etl-function-841051091018312111099"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process_raw_data" {
 }
 
 resource "aws_lambda_function" "timesync-lambda-function-notification_team" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
+  filename      = "${path.module}/code/codigo_padrao.zip"
   function_name = "timesync-mensage-function-841051091018312111099"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
@@ -40,7 +40,7 @@ resource "aws_lambda_function" "timesync-lambda-function-notification_team" {
 }
 
 resource "aws_lambda_function" "timesync-lambda-function-process_trusted_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
+  filename      = "${path.module}/code/codigo_padrao.zip"
   function_name = "timesync-insert-functions-841051091018312111099"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
@@ -59,7 +59,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process_trusted_data" {
 }
 
 resource "aws_lambda_function" "timesync-lambda-function-process_backup_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
+  filename      = "${path.module}/code/codigo_padrao.zip"
   function_name = "timesync-backup-function-841051091018312111099"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
