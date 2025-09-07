@@ -8,5 +8,5 @@ output "bucket_arn_trusted" {
 }
 
 output "bucket_arn_backup" {
-  value = aws_s3_bucket.backup.bucket
+  value = aws_s3_bucket.backup_bucket.bucket
 }

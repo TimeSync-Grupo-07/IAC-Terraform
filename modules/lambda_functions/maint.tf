@@ -1,20 +1,41 @@
+# Camada para conector MySQL
 resource "aws_lambda_layer_version" "timesync-lambda-layer-mysql_connector" {
   filename            = "${path.module}/code/mysql_connector_python.zip"
   layer_name          = "timesync-lambda-layer-mysql_connector"
   compatible_runtimes = ["python3.11"]
 }
 
-resource "aws_lambda_function" "timesync-lambda-function-process_raw_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
-  function_name = "timesync-etl-function-841051091018312111099"
+# 1. Lambda para backup - ativa quando bucket_raw recebe dados
+resource "aws_lambda_function" "timesync-lambda-function-backup" {
+  filename      = "${path.module}/code/codigo_padrao.zip"
+  function_name = "timesync-backup-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "lambda_function.lambda_handler"
+  handler       = "backup_lambda.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
   environment {
     variables = {
+      BACKUP_BUCKET = var.timesync-bucket-backup-bucket_name
+      RAW_BUCKET    = var.timesync-bucket-raw-bucket_name
+    }
+  }
+}
+
+# 2. Lambda para primeiro tratamento - ativa quando bucket_raw recebe dados
+resource "aws_lambda_function" "timesync-lambda-function-process-raw" {
+  filename      = "${path.module}/code/codigo_padrao.zip"
+  function_name = "timesync-process-raw-function"
+  role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
+  handler       = "process_raw_lambda.lambda_handler"
+  runtime       = "python3.11"
+  timeout       = 120  # Aumentado para processamento
+  memory_size   = 512  # Aumentado para processamento
+
+  environment {
+    variables = {
       RAW_BUCKET = var.timesync-bucket-raw-bucket_name
+      NEXT_LAMBDA_ARN = aws_lambda_function.timesync-lambda-function-process-step2.arn
     }
   }
 
@@ -23,27 +44,45 @@ resource "aws_lambda_function" "timesync-lambda-function-process_raw_data" {
   ]
 }
 
-resource "aws_lambda_function" "timesync-lambda-function-notification_team" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
-  function_name = "timesync-mensage-function-841051091018312111099"
+# 3. Lambda para segundo tratamento - chamada pela lambda anterior
+resource "aws_lambda_function" "timesync-lambda-function-process-step2" {
+  filename      = "${path.module}/code/codigo_padrao.zip"
+  function_name = "timesync-process-step2-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "lambda_function.lambda_handler"
+  handler       = "process_step2_lambda.lambda_handler"
+  runtime       = "python3.11"
+  timeout       = 120  # Aumentado para processamento
+  memory_size   = 512  # Aumentado para processamento
+
+  environment {
+    variables = {
+      NEXT_LAMBDA_ARN = aws_lambda_function.timesync-lambda-function-process-trusted.arn
+    }
+  }
+}
+
+# 4. Lambda para envio ao trusted - chamada pela lambda anterior
+resource "aws_lambda_function" "timesync-lambda-function-process-trusted" {
+  filename      = "${path.module}/code/codigo_padrao.zip"
+  function_name = "timesync-process-trusted-function"
+  role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
+  handler       = "process_trusted_lambda.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
   environment {
     variables = {
-      SNS_TOPIC_ARN = var.timesync-sns-topico-information-arn
+      TRUSTED_BUCKET = var.timesync-bucket-trusted-bucket_name
     }
   }
-
 }
 
-resource "aws_lambda_function" "timesync-lambda-function-process_trusted_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
-  function_name = "timesync-insert-functions-841051091018312111099"
+# 5. Lambda para inserção no MySQL - ativa quando bucket_trusted recebe dados
+resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
+  filename      = "${path.module}/code/codigo_padrao.zip"
+  function_name = "timesync-insert-db-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "lambda_function.lambda_handler"
+  handler       = "insert_db_lambda.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
@@ -58,115 +97,105 @@ resource "aws_lambda_function" "timesync-lambda-function-process_trusted_data" {
   ]
 }
 
-resource "aws_lambda_function" "timesync-lambda-function-process_backup_data" {
-  filename      = "${path.module}/code/dummy_lambda.zip"
-  function_name = "timesync-backup-function-841051091018312111099"
-  role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.11"
-  timeout       = 60
-
-  environment {
-    variables = {
-      BACKUP_BUCKET = var.timesync-bucket-backup-bucket_name
-    }
-  }
-}
-
-resource "aws_s3_bucket_notification" "timesync-lambda-trigger-process_trusted_data" {
-  bucket = var.timesync-bucket-trusted-bucket_name
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.timesync-lambda-function-process_trusted_data.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".csv"
-  }
-
-  depends_on = [aws_lambda_permission.timesync-lambda-permission-allow-invoke-process_trusted_data]
-}
-
-resource "aws_s3_bucket_notification" "timesync-lambda-trigger-process_backup_lambda" {
-  bucket = var.timesync-bucket-raw-bucket_name
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.timesync-lambda-function-process_backup_data.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = ""
-    filter_suffix       = ".csv"
-  }
-
-  depends_on = [ aws_lambda_permission.timesync-lambda-permission-allow-invoke-process_backup_data ]
-}
-
-resource "aws_s3_bucket_notification" "timesync-lambda-function-notification_team" {
-  bucket = var.timesync-bucket-backup-bucket_name
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.timesync-lambda-function-notification_team.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = ""
-    filter_suffix       = ".csv"
-  }
-
-  depends_on = [ aws_lambda_permission.timesync-lambda-permission-allow-invoke-notification_team ]
-}
-
-resource "aws_lambda_permission" "timesync-lambda-permission-allow-invoke-process_backup_data" {
-  statement_id  = "AllowExecutionFromS3Raw"
+# Permissões para as lambdas
+resource "aws_lambda_permission" "timesync-lambda-permission-backup" {
+  statement_id  = "AllowExecutionFromS3RawBackup"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.timesync-lambda-function-process_backup_data.function_name
+  function_name = aws_lambda_function.timesync-lambda-function-backup.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = "arn:aws:s3:::${var.timesync-bucket-raw-bucket_name}"
 }
 
-resource "aws_lambda_permission" "timesync-lambda-permission-allow-invoke-process_trusted_data" {
+resource "aws_lambda_permission" "timesync-lambda-permission-process-raw" {
+  statement_id  = "AllowExecutionFromS3RawProcess"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.timesync-lambda-function-process-raw.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = "arn:aws:s3:::${var.timesync-bucket-raw-bucket_name}"
+}
+
+resource "aws_lambda_permission" "timesync-lambda-permission-step2" {
+  statement_id  = "AllowExecutionFromLambdaProcessRaw"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.timesync-lambda-function-process-step2.function_name
+  principal     = "lambda.amazonaws.com"
+  source_arn    = aws_lambda_function.timesync-lambda-function-process-raw.arn
+}
+
+resource "aws_lambda_permission" "timesync-lambda-permission-trusted" {
+  statement_id  = "AllowExecutionFromLambdaStep2"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.timesync-lambda-function-process-trusted.function_name
+  principal     = "lambda.amazonaws.com"
+  source_arn    = aws_lambda_function.timesync-lambda-function-process-step2.arn
+}
+
+resource "aws_lambda_permission" "timesync-lambda-permission-insert-db" {
   statement_id  = "AllowExecutionFromS3Trusted"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.timesync-lambda-function-process_trusted_data.function_name
+  function_name = aws_lambda_function.timesync-lambda-function-insert-db.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = "arn:aws:s3:::${var.timesync-bucket-trusted-bucket_name}"
 }
 
-resource "aws_lambda_permission" "timesync-lambda-permission-allow-invoke-notification_team" {
-  statement_id  = "AllowExecutionFromS3Backup"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.timesync-lambda-function-notification_team.function_name
-  principal     = "s3.amazonaws.com"
-  source_arn    = "arn:aws:s3:::${var.timesync-bucket-backup-bucket_name}"
+# Gatilhos S3 para as lambdas
+resource "aws_s3_bucket_notification" "timesync-lambda-trigger-backup" {
+  bucket = var.timesync-bucket-raw-bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.timesync-lambda-function-backup.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_suffix       = ".csv"
+  }
+
+  depends_on = [aws_lambda_permission.timesync-lambda-permission-backup]
 }
 
-resource "aws_lambda_permission" "timesync-lambda-permission-allow-invoke-process_raw_data" {
-  statement_id  = "AllowBackupToInvokeRaw"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.timesync-lambda-function-process_raw_data.function_name
-  principal     = "lambda.amazonaws.com"
-  source_arn    = aws_lambda_function.timesync-lambda-function-process_backup_data.arn
+resource "aws_s3_bucket_notification" "timesync-lambda-trigger-process-raw" {
+  bucket = var.timesync-bucket-raw-bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.timesync-lambda-function-process-raw.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_suffix       = ".csv"
+  }
+
+  depends_on = [aws_lambda_permission.timesync-lambda-permission-process-raw]
 }
 
-resource "aws_lambda_function_event_invoke_config" "timesync-lambda-destination-" {
-  function_name           = aws_lambda_function.timesync-lambda-function-process_backup_data.function_name
-  qualifier               = "$LATEST"
-  maximum_retry_attempts  = 0
+resource "aws_s3_bucket_notification" "timesync-lambda-trigger-insert-db" {
+  bucket = var.timesync-bucket-trusted-bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.timesync-lambda-function-insert-db.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_suffix       = ".csv"
+  }
+
+  depends_on = [aws_lambda_permission.timesync-lambda-permission-insert-db]
+}
+
+# Configurações de destino para encadeamento de lambdas
+resource "aws_lambda_function_event_invoke_config" "timesync-lambda-destination-process-raw" {
+  function_name          = aws_lambda_function.timesync-lambda-function-process-raw.function_name
+  qualifier              = "$LATEST"
+  maximum_retry_attempts = 0
 
   destination_config {
     on_success {
-      destination = aws_lambda_function.timesync-lambda-function-process_raw_data.arn
+      destination = aws_lambda_function.timesync-lambda-function-process-step2.arn
     }
   }
-
-  depends_on = [aws_lambda_permission.timesync-lambda-permission-allow-invoke-notification_team]
 }
 
-resource "aws_lambda_function_event_invoke_config" "notification_success_destination" {
-  function_name           = aws_lambda_function.timesync-lambda-function-notification_team.arn
-  qualifier               = "$LATEST"
-  maximum_retry_attempts  = 0
+resource "aws_lambda_function_event_invoke_config" "timesync-lambda-destination-step2" {
+  function_name          = aws_lambda_function.timesync-lambda-function-process-step2.function_name
+  qualifier              = "$LATEST"
+  maximum_retry_attempts = 0
 
   destination_config {
     on_success {
-      destination = var.timesync-sns-topico-information-arn
+      destination = aws_lambda_function.timesync-lambda-function-process-trusted.arn
     }
   }
-
-  # depends_on = [aws_lambda_permission.allow_lambda_notification_to_publish_sns]
 }

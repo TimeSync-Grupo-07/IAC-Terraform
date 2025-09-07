@@ -18,26 +18,14 @@ output "timesync-subrede-privada-apps-id" {
   value = aws_subnet.timesync-subrede-privada-apps.id
 }
 
-output "timesync-subrede-privada-banco_de_dados-id" {
-  value = aws_subnet.timesync-subrede-privada-banco_de_dados.id
-}
-
 output "timesync-grupo_de_seguranca-publico-servidor_web-id" {
   value = aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id
 }
 
-output "timesync-grupo_de_seguranca-publico-central_monitoramento-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-publico-central_monitoramento.id
+output "timesync-grupo_de_seguranca-publico-captura_dados-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-publico-captura_dados.id
 }
 
-output "timesync-grupo_de_seguranca-privado-api-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-privado-api.id
-}
-
-output "timesync-grupo_de_seguranca-privado-banco_de_dados-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-privado-banco_de_dados.id
-}
-
-output "timesync-grupo_de_seguranca-privado-transformacao_de_dados-id" {
-  value = aws_security_group.timesync-grupo_de_seguranca-privado-transformacao_de_dados.id
+output "timesync-grupo_de_seguranca-privado-api-db-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-privado-api-db.id
 }
