@@ -63,3 +63,26 @@ module "lambda" {
 
 }
 
+variable "lab_mode" {
+  description = "Define se o lab está ligado ou desligado"
+  type        = string
+  default     = "on"
+}
+
+resource "aws_ec2_instance_state" "stop_servidor_web" {
+  count       = var.lab_mode == "off" ? 1 : 0
+  instance_id = module.maquinas.servidor_web_id
+  state       = "stopped"
+}
+
+resource "aws_ec2_instance_state" "stop_captura_dados" {
+  count       = var.lab_mode == "off" ? 1 : 0
+  instance_id = module.maquinas.captura_dados_id
+  state       = "stopped"
+}
+
+resource "aws_ec2_instance_state" "stop_api_db" {
+  count       = var.lab_mode == "off" ? 1 : 0
+  instance_id = module.maquinas.api_db_id
+  state       = "stopped"
+}
