@@ -53,6 +53,15 @@ resource "aws_network_acl" "timesync-network_acess_control_list-publica" {
     rule_no = 105
     action = "allow"
     cidr_block = "0.0.0.0/0"
+    from_port = 8888
+    to_port = 8888
+  }
+
+  ingress {
+    protocol = "tcp"
+    rule_no = 106
+    action = "allow"
+    cidr_block = "0.0.0.0/0"
     from_port = 993
     to_port = 993
   }
