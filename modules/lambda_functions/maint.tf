@@ -97,7 +97,6 @@ resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
   ]
 }
 
-# Permissões para as lambdas
 resource "aws_lambda_permission" "timesync-lambda-permission-backup" {
   statement_id  = "AllowExecutionFromS3RawBackup"
   action        = "lambda:InvokeFunction"
@@ -138,7 +137,6 @@ resource "aws_lambda_permission" "timesync-lambda-permission-insert-db" {
   source_arn    = "arn:aws:s3:::${var.timesync-bucket-trusted-bucket_name}"
 }
 
-# Gatilhos S3 para as lambdas
 resource "aws_s3_bucket_notification" "timesync-lambda-trigger-backup" {
   bucket = var.timesync-bucket-raw-bucket_name
 
@@ -175,7 +173,6 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-insert-db" {
   depends_on = [aws_lambda_permission.timesync-lambda-permission-insert-db]
 }
 
-# Configurações de destino para encadeamento de lambdas
 resource "aws_lambda_function_event_invoke_config" "timesync-lambda-destination-process-raw" {
   function_name          = aws_lambda_function.timesync-lambda-function-process-raw.function_name
   qualifier              = "$LATEST"
