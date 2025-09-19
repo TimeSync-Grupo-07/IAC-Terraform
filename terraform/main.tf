@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "rede" {
-  source = "./terraform/modules/rede"
+  source = "./modules/rede"
 
   timesync-vpc-cidr_block = "10.0.0.0/23"
   timesync-subrede-publica-cidr_block = "10.0.0.0/24"
@@ -17,7 +17,7 @@ module "maquinas" {
 
   depends_on = [ module.rede ]
 
-  source = "./terraform/modules/maquinas"
+  source = "./modules/maquinas"
 
   timesync-vpc-id = module.rede.timesync-vpc-id
   timesync-subrede-publica-id = module.rede.timesync-subrede-publica-id
@@ -29,7 +29,7 @@ module "maquinas" {
 }
 
 module "acls" {
-  source = "./terraform/modules/acls"
+  source = "./modules/acls"
 
   timesync-vpc-id = module.rede.timesync-vpc-id
   timesync-vpc-cidr_block = module.rede.timesync-vpc-cidr_block
@@ -41,13 +41,13 @@ module "acls" {
 
 module "s3" {
   
-  source = "./terraform/modules/s3"
+  source = "./modules/s3"
 
 }
 
 module "lambda" {
 
-  source = "./terraform/modules/lambda_functions"
+  source = "./modules/lambda_functions"
 
   timesync-bucket-raw-bucket_name = module.s3.bucket_arn_raw
   timesync-bucket-trusted-bucket_name = module.s3.bucket_arn_trusted

@@ -2,17 +2,17 @@
 
   resource "aws_key_pair" "timesync-chave-public-servidor_web" {
     key_name = "Key-public-servidor_web"
-    public_key = file("${path.module}/chaves/Key-public-servidor-web.pem.pub")
+    public_key = file(".././chaves/Key-public-servidor-web.pem.pub")
   }
 
   resource "aws_key_pair" "timesync-chave-public-captura_dados" {
     key_name = "Key-public-captura_dados"
-    public_key = file("${path.module}/chaves/Key-public-captura-dados.pem.pub")
+    public_key = file(".././chaves/Key-public-captura-dados.pem.pub")
   }
 
   resource "aws_key_pair" "timesync-chave-private-api-db" {
     key_name = "Key-private-api-db"
-    public_key = file("${path.module}/chaves/Key-private-api-db.pem.pub")
+    public_key = file(".././chaves/Key-private-api-db.pem.pub")
   }
 
   resource "aws_instance" "timesync-instancia-publica-servidor_web" {
@@ -33,12 +33,12 @@
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("${path.module}/chaves/Key-public-servidor-web.pem")
+      private_key = file(".././chaves/Key-public-servidor-web.pem")
       host        = self.public_ip
     }
 
     provisioner "file" {
-      source      = "${path.module}/chaves/Key-private-api-db.pem"
+      source      = ".././chaves/Key-private-api-db.pem"
       destination = "/home/ubuntu/.ssh/Key-private-api-db.pem"
     }
 
@@ -73,7 +73,7 @@
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("${path.module}/chaves/Key-public-captura-dados.pem")
+      private_key = file(".././chaves/Key-public-captura-dados.pem")
       host        = self.public_ip
     }
 
