@@ -17,7 +17,7 @@
 
   resource "aws_instance" "timesync-instancia-publica-servidor_web" {
     ami                         = var.timesync-ami-padrao
-    instance_type               = "t2.micro"
+    instance_type               = "t2.large"
     subnet_id                   = var.timesync-subrede-publica-id
     vpc_security_group_ids      = [var.timesync-grupo_de_seguranca-publico-servidor_web-id]
     key_name                    = aws_key_pair.timesync-chave-public-servidor_web.key_name
@@ -57,7 +57,7 @@
 
   resource "aws_instance" "timesync-instancia-publica-captura_dados" {
     ami                         = var.timesync-ami-padrao
-    instance_type               = "t2.micro"
+    instance_type               = "t2.medium"
     subnet_id                   = var.timesync-subrede-publica-id
     vpc_security_group_ids      = [var.timesync-grupo_de_seguranca-publico-captura_dados-id]
     key_name                    = aws_key_pair.timesync-chave-public-captura_dados.key_name
@@ -86,7 +86,7 @@
 
   resource "aws_instance" "timesync-instancia-privada-api_db" {
     ami                    = var.timesync-ami-padrao
-    instance_type          = "t2.micro"
+    instance_type          = "t2.medium"
     subnet_id              = var.timesync-subrede-privada-apps-id
     vpc_security_group_ids = [var.timesync-grupo_de_seguranca-privado-api-db-id]
     key_name               = aws_key_pair.timesync-chave-private-api-db.key_name
