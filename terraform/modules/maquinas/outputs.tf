@@ -21,3 +21,15 @@ output "captura_dados_id" {
 output "api_db_id" {
   value = aws_instance.timesync-instancia-privada-api_db.id
 }
+
+output "chave_servidor_web" {
+  value = aws_key_pair.timesync-chave-public-servidor_web.key_name
+}
+
+output "chave_captura_dados" {
+  value = aws_key_pair.timesync-chave-public-captura_dados.key_name
+}
+
+output "chave_api_db" {
+  value = aws_key_pair.timesync-chave-private-api-db.key_name
+}

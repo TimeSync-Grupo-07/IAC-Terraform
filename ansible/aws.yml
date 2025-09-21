@@ -1,0 +1,20 @@
+all:
+  children:
+    public:
+      hosts:
+        servidor_web:
+          ansible_host: 52.207.213.3
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ../chaves/Key-public-servidor_web.pem
+        captura_dados:
+          ansible_host: 13.221.181.163
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ../chaves/Key-public-captura_dados.pem
+    private:
+      hosts:
+        api_db:
+          ansible_host: 10.0.1.246
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ../chaves/Key-private-api-db.pem
+          ansible_ssh_common_args: -o ProxyCommand='ssh -W %h:%p -q -i ../chaves/Key-public-servidor_web.pem
+            ubuntu@52.207.213.3'
