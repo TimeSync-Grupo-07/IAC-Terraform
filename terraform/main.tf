@@ -28,17 +28,6 @@ module "maquinas" {
   timesync-grupo_de_seguranca-privado-api-db-id = module.rede.timesync-grupo_de_seguranca-privado-api-db-id
 }
 
-module "acls" {
-  source                     = "./modules/acls"
-
-  timesync-vpc-id = module.rede.timesync-vpc-id
-  timesync-vpc-cidr_block = module.rede.timesync-vpc-cidr_block
-  timesync-subrede-publica-id = module.rede.timesync-subrede-publica-id
-  timesync-subrede-privada-apps-id = module.rede.timesync-subrede-privada-apps-id
-
-  depends_on = [ module.maquinas ]
-}
-
 module "s3" {
   
   source = "./modules/s3"
@@ -62,4 +51,3 @@ module "lambda" {
   timesync-region                     = "us-east-1"
 
 }
-

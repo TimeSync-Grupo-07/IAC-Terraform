@@ -1,0 +1,4 @@
+- name: Atualizar pacotes
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist

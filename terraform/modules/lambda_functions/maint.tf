@@ -1,13 +1,13 @@
 # Camada para conector MySQL
 resource "aws_lambda_layer_version" "timesync-lambda-layer-mysql_connector" {
-  filename            = "${path.module}/code/mysql_connector_python.zip"
+  filename            = "./modules/lambda_functions/code/mysql_connector_python.zip"
   layer_name          = "timesync-lambda-layer-mysql_connector"
   compatible_runtimes = ["python3.11"]
 }
 
 # 1. Lambda para backup - ativa quando bucket_raw recebe dados
 resource "aws_lambda_function" "timesync-lambda-function-backup" {
-  filename      = "${path.module}/code/codigo_padrao.zip"
+  filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-backup-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "backup_lambda.lambda_handler"
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "timesync-lambda-function-backup" {
 
 # 2. Lambda para primeiro tratamento - ativa quando bucket_raw recebe dados
 resource "aws_lambda_function" "timesync-lambda-function-process-raw" {
-  filename      = "${path.module}/code/codigo_padrao.zip"
+  filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-raw-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "process_raw_lambda.lambda_handler"
@@ -46,7 +46,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-raw" {
 
 # 3. Lambda para segundo tratamento - chamada pela lambda anterior
 resource "aws_lambda_function" "timesync-lambda-function-process-step2" {
-  filename      = "${path.module}/code/codigo_padrao.zip"
+  filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-step2-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "process_step2_lambda.lambda_handler"
@@ -63,7 +63,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-step2" {
 
 # 4. Lambda para envio ao trusted - chamada pela lambda anterior
 resource "aws_lambda_function" "timesync-lambda-function-process-trusted" {
-  filename      = "${path.module}/code/codigo_padrao.zip"
+  filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-trusted-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "process_trusted_lambda.lambda_handler"
@@ -79,7 +79,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-trusted" {
 
 # 5. Lambda para inserção no MySQL - ativa quando bucket_trusted recebe dados
 resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
-  filename      = "${path.module}/code/codigo_padrao.zip"
+  filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-insert-db-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "insert_db_lambda.lambda_handler"
@@ -97,7 +97,6 @@ resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
   ]
 }
 
-# Permissões para as lambdas
 resource "aws_lambda_permission" "timesync-lambda-permission-backup" {
   statement_id  = "AllowExecutionFromS3RawBackup"
   action        = "lambda:InvokeFunction"
@@ -138,7 +137,6 @@ resource "aws_lambda_permission" "timesync-lambda-permission-insert-db" {
   source_arn    = "arn:aws:s3:::${var.timesync-bucket-trusted-bucket_name}"
 }
 
-# Gatilhos S3 para as lambdas
 resource "aws_s3_bucket_notification" "timesync-lambda-trigger-backup" {
   bucket = var.timesync-bucket-raw-bucket_name
 
@@ -175,7 +173,6 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-insert-db" {
   depends_on = [aws_lambda_permission.timesync-lambda-permission-insert-db]
 }
 
-# Configurações de destino para encadeamento de lambdas
 resource "aws_lambda_function_event_invoke_config" "timesync-lambda-destination-process-raw" {
   function_name          = aws_lambda_function.timesync-lambda-function-process-raw.function_name
   qualifier              = "$LATEST"
