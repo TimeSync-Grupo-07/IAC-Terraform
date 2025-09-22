@@ -90,3 +90,33 @@
           - "Docker: {{ docker_version.stdout }}"
           - "Git: {{ git_version.stdout }}"
           - "Docker Compose: {{ docker_compose_version.stdout }}"
+
+- name: Configuração das EC2 Servidor-WEB
+  hosts: servidor_web
+  become: yes
+  tasks:
+  - name: Atualizar cache de pacotes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+    when: ansible_pkg_mgr == 'apt'
+
+- name: Configuração das EC2 CAPTURA-DADOS
+  hosts: captura_dados
+  become: yes
+  tasks:
+  - name: Atualizar cache de pacotes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+    when: ansible_pkg_mgr == 'apt'
+
+- name: Configuração das EC2 API-DB
+  hosts: captura_dados
+  become: yes
+  tasks:
+  - name: Atualizar cache de pacotes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+    when: ansible_pkg_mgr == 'apt'
