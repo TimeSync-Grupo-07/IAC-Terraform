@@ -1,1 +1,1 @@
-[{"key_file":"../chaves/Key-public-servidor_web.pem","name":"servidor_web","public_ip":"52.207.213.3"},{"key_file":"../chaves/Key-public-captura_dados.pem","name":"captura_dados","public_ip":"13.221.181.163"}]
+[{"key_file":"../chaves/Key-public-servidor-web.pem","name":"servidor_web","public_ip":"44.210.117.238"},{"key_file":"../chaves/Key-public-captura-dados.pem","name":"captura_dados","public_ip":"107.23.60.248"}]
