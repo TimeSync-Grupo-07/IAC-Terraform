@@ -1,0 +1,92 @@
+---
+- name: Instalar Docker e Git e configurar permissões
+  hosts: all
+  become: yes
+  tasks:
+    - name: Atualizar cache de pacotes
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Instalar dependências
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Adicionar chave GPG do Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Adicionar repositório do Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Instalar Docker Engine
+      package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Instalar Git
+      package:
+        name: git
+        state: present
+
+    - name: Iniciar e habilitar serviço Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Criar grupo docker (se não existir)
+      group:
+        name: docker
+        state: present
+
+    - name: Adicionar usuário atual ao grupo docker
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+
+    - name: Instalar Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Validar instalação do Docker
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Validar instalação do Git
+      command: git --version
+      register: git_version
+      changed_when: false
+
+    - name: Validar instalação do Docker Compose
+      command: docker-compose --version
+      register: docker_compose_version
+      changed_when: false
+
+    - name: Mostrar versões instaladas
+      debug:
+        msg:
+          - "Docker: {{ docker_version.stdout }}"
+          - "Git: {{ git_version.stdout }}"
+          - "Docker Compose: {{ docker_compose_version.stdout }}"
