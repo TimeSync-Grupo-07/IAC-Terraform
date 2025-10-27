@@ -1,12 +1,12 @@
 
 
   resource "aws_key_pair" "timesync-chave-public-servidor_web" {
-    key_name = "Key-public-servidor_web"
+    key_name = "Key-public-servidor-web"
     public_key = file(".././chaves/Key-public-servidor-web.pem.pub")
   }
 
   resource "aws_key_pair" "timesync-chave-public-captura_dados" {
-    key_name = "Key-public-captura_dados"
+    key_name = "Key-public-captura-dados"
     public_key = file(".././chaves/Key-public-captura-dados.pem.pub")
   }
 
