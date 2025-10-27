@@ -14,6 +14,11 @@ output "public_hosts" {
       name      = "captura_dados"
       public_ip = module.maquinas.timesync-instancia-publica-captura_dados-public_ip
       key_file  = "../chaves/${module.maquinas.chave_captura_dados}.pem"
+    },
+    {
+      name      = "monitoramento-controle"
+      public_ip = module.maquinas.timesync-instancia-publica-monitoramento-controle-public_ip
+      key_file  = "../chaves/${module.maquinas.chave_monitoramento_controle}.pem"
     }
   ]
 }

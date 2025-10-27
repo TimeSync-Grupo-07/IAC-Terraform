@@ -15,6 +15,11 @@
     public_key = file(".././chaves/Key-private-api-db.pem.pub")
   }
 
+  resource "aws_key_pair" "timesync-chave-publica-monitoramento-controle" {
+    key_name = "Key-public-monitoramento-controle"
+    public_key = file(".././chaves/Key-public-monitoramento-controle.pem.pub")
+  }
+
   resource "aws_instance" "timesync-instancia-publica-servidor_web" {
     ami                         = var.timesync-ami-padrao
     instance_type               = "t2.large"
@@ -103,4 +108,43 @@
     }
   }
 
+  resource "aws_instance" "timesync-instancia-monitoramento-controle" {
+
+    ami                         = var.timesync-ami-padrao
+    instance_type               = "t2.medium"
+    subnet_id                   = var.timesync-subrede-publica-id
+    vpc_security_group_ids      = [var.timesync-grupo_de_seguranca-publico-monitoramento-controle-id]
+    key_name                    = aws_key_pair.timesync-chave-publica-monitoramento-controle.key_name
+    iam_instance_profile        = "LabInstanceProfile"
+    associate_public_ip_address = true
+
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_size = 40
+      volume_type = "standard"
+    }
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(".././chaves/Key-public-monitoramento-controle.pem")
+      host        = self.public_ip
+    }
+
+    provisioner "file" {
+      source      = ".././chaves/Key-private-api-db.pem"
+      destination = "/home/ubuntu/.ssh/Key-private-api-db.pem"
+    }
+
+    provisioner "remote-exec" {
+      inline = [
+        "chmod 400 /home/ubuntu/.ssh/Key-private-api-db.pem"
+      ]
+    }
+
+    tags = {
+      Name = "timesync-instancia-publica-monitoramento-controle"
+    }
+
+  }
 

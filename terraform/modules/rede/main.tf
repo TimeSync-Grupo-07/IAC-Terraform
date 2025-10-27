@@ -149,6 +149,42 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-publico-servidor_web"
   }
 }
 
+resource "aws_security_group" "timesync-grupo_de_seguranca-publico-monitoramento-controle" {
+  vpc_id = aws_vpc.timesync-vpc.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3000
+    to_port = 3000
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "timesync-grupo_de_seguranca-publico-servidor-web"
+  }
+}
+
 resource "aws_security_group" "timesync-grupo_de_seguranca-publico-captura_dados" {
   vpc_id = aws_vpc.timesync-vpc.id
 

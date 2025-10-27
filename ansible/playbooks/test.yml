@@ -1,6 +1,0 @@
-- name: Testar conexão com todas as instâncias
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: Ping
-      ansible.builtin.ping:
