@@ -12,6 +12,15 @@ terraform.tfstate.*
 *.tfvars
 *.tfvars.json
 
+/ansible/inventory/bastion*
+/ansible/inventory/private_hosts*
+/ansible/inventory/public_hosts*
+
+!/ansible/.env.sample
+
+/ansible/aws.yml
+
+
 # Arquivos de saída do Terraform
 *.tfplan
 plan.out

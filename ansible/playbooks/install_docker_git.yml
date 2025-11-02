@@ -4,9 +4,9 @@
   gather_facts: true
   vars:
     docker_users: [ubuntu]
-    aws_access_key_id: "ASIAYGATKH322J5QFAQD"
-    aws_secret_access_key: "Fkjlh+JYJ/ELbDSg4rCRM+50+rBB3Q2WEjcjMLzG"
-    aws_session_token: "IQoJb3JpZ2luX2VjEN7//////////wEaCXVzLXdlc3QtMiJGMEQCIC/Bjmm0FIYHQIG3fNrCku5W0HueB+PxdFLWe5P5DCpdAiBPlQAvog+rtHycEyQp8+WawupxYUUIKRpsJre2bmsGESq8AgiX//////////8BEAAaDDU2MjY4MTIzMzE0MSIMH+QJ021js1gq3YS3KpACcfXys8cNfEx08NILTgUQXOYlYcaeW1mqgVEzoGhe6q+5HR7TqSJ1lNaMR79zyBQFpuHqJZ/QR5d2yV7q7TMVVVkTmZAzq+n/IHPKa8TE0y6QKn+IVxTFUmWY+CnhDRc+W7cwcuKqTmbY9L3SpYr+i9c7TioQCx4+LpU/2pH4CwpyZy6DRkYNvW956pRX+OvEi6rqWY3SCvN0+8dHo3s9FgUHLcpC3iI5VzNRlUP409OtFMrcvfIndgsVTwoQ/Yf4El31T+kGNvBxVlKvvfFG0tnujyJ27+K5/TnJpwtBbS44BWJCEgN6abQYcNJmM1OA7tzRqZ/2FRPKKVJ/Qg4uswaXPEWWFbFr/QP8KTv0zXww+Kv6xwY6ngH0DuZb0zpzfjybgisskqxw6NyYZGIxR4QxcPTELmRXoBC+dB7tYzzxXnE3xdyg1XqJ5dMQ//4DmmUw1TPOLjVQwuVQ5WTyPQ+7mHYCDbH0f19CsvQyoVcd7L5fqEto83u03dKRD3guqxS9LQNZ1riDgn7/mAli7m6iheCLW+tFp5lc5JK8TAQGTCA6cV1VUsRbhbKkbntq/9d43IwPYg=="
+    aws_access_key_id: "ASIAYGATKH32SN7PMKCD"
+    aws_secret_access_key: "usq7Wm4nXal0rPdU64UKCjPi7krukVgkAHEMyohN"
+    aws_session_token: "IQoJb3JpZ2luX2VjEIP//////////wEaCXVzLXdlc3QtMiJHMEUCIQD47mTXkn4oXBMFXeGcIcmJIQEH5M85jp+G0WiKFexGgQIgOao2gajE9q4RFYXDHJPg/G6f96Mtef02KskGePnIChsqswIITBAAGgw1NjI2ODEyMzMxNDEiDGHudsUbmgTQfhLW1yqQAtmkl0OADOCvb5dQ5FSKR1cczrjjAyTrfM2n/ixT8xOT0ZLa3GXmjeDTkiDTfvzVzFJyDj4p8OEeVVLJvkb5nwzVtaAuOSTNkK5xrqTviAiBPXdhfWKcv9t0LDmrVzTwMnH194eP7JbqIXxoMNH+68nWVfKNXNO4aU37QwlBVsSIARFzumRQuT8bZCeRi7rLUbABEdIBq+hVOZM2HHVcj9zp9SgW4mZW49s6xgQanED7C7aeXGkk+WtMLpNqO+afzCQt5csy60/h6jeSKvd6VMdZRtqmvjPCCshjgNPdQ1NAF5hAlHEJ5mD29Kiiny8r8mkmxVpGb0nkX3YHiUt3lIU8Mnx7nsRpYwVqTvOidVeMMMTKnsgGOp0BbSzkh0LTYgogUogkFD7TPx98sCR6Fv6vUTI7A7/9H6C9+8rT7NH0TRuNEdp+2etFMvbj9EDhhjmS2CuoEGPARUeGoSjH+dljaAikNOyNHH8vCJkHvxuZ9TDSroT1mtHV2XqqhwvXol4bv6iyjiHhVnNW/gCaBXSTL/+g79kXW26lLQb5PHLxtBFzK/O0oJCBKiO0IYAVYJ8lz4+ayw=="
     aws_default_region: "us-east-1"
 
   tasks:

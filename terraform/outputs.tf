@@ -32,3 +32,7 @@ output "private_hosts" {
     }
   ]
 }
+
+output "s3_bucket_name_raw" {
+  value = module.s3.bucket_arn_raw
+}
