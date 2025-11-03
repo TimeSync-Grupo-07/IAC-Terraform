@@ -3,8 +3,6 @@
   become: yes
   gather_facts: true
 
-  #Mudar nome do arquivo de exemplo das variaveis
-
   vars:
     repo_url: "https://github.com/TimeSync-Grupo-07/Database-MySQL.git"
     repo_dir: "/home/ubuntu/Database-MySQL"

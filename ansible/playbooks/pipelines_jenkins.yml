@@ -3,8 +3,6 @@
   become: yes
   gather_facts: true
 
-  # Adicionar mudança de permissão da pasta jenkins_home para 1000:1000
-
   vars:
     repo_url: "https://github.com/TimeSync-Grupo-07/PIPELINES-JENKINS.git"
     repo_dir: "/home/ubuntu/PIPELINES-JENKINS"
@@ -16,6 +14,10 @@
         dest: "{{ repo_dir }}"
         version: main
         update: yes
+
+    - name: Ajustar permissões da pasta jenkins_home
+      ansible.builtin.shell:
+        cmd: sudo chown -R 1000:1000 "{{ repo_dir }}/jenkins_home"
 
     - name: Subir container com Docker Compose
       ansible.builtin.shell:
