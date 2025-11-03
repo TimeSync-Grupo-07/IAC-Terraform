@@ -32,6 +32,37 @@
         state: present
 
     # ================================
+    # Instalar Java 17 e Maven
+    # ================================
+    - name: Adicionar repositório do OpenJDK 17
+      ansible.builtin.apt_repository:
+        repo: "ppa:openjdk-r/ppa"
+        state: present
+
+    - name: Instalar Java 17 (OpenJDK)
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+
+    - name: Instalar Maven
+      ansible.builtin.apt:
+        name: maven
+        state: present
+
+    - name: Verificar versões Java e Maven
+      ansible.builtin.shell: |
+        java -version
+        mvn -version
+      register: java_maven_version
+      changed_when: false
+
+    - name: Exibir versões Java e Maven
+      ansible.builtin.debug:
+        msg:
+          - "{{ java_maven_version.stdout_lines }}"
+
+    # ================================
     # Instalar Docker e dependências via script oficial
     # ================================
     - name: Instalar Docker via script oficial

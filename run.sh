@@ -56,3 +56,15 @@ ansible-playbook -i aws.yml playbooks/pipelines_jenkins.yml
 ansible-playbook playbooks/database.yml \
   -i aws.yml \
   --extra-vars "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} MYSQL_USER=${MYSQL_USER} MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+
+ansible-playbook playbooks/api_load_balancer.yml \
+  -i aws.yml \
+  --extra-vars "MYSQL_USER=${MYSQL_USER} MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+
+ansible-playbook -i aws.yml playbooks/grafana_env.yml
+
+cd ..
+
+cd terraform/
+
+terraform output

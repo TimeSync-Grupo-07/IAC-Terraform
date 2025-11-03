@@ -225,8 +225,8 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-privado-api-db" {
   }
 
   ingress {
-    from_port       = 8080
-    to_port         = 8080
+    from_port       = 80
+    to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
   }
