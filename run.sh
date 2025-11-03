@@ -50,3 +50,9 @@ ansible-playbook -i aws.yml playbooks/install_docker_git.yml
 ansible-playbook playbooks/data_reading.yml \
   -i aws.yml \
   --extra-vars "email_password=${EMAIL_PASS} s3_bucket_name=${S3_BUCKET_NAME}"
+
+ansible-playbook -i aws.yml playbooks/pipelines_jenkins.yml
+
+ansible-playbook playbooks/database.yml \
+  -i aws.yml \
+  --extra-vars "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} MYSQL_USER=${MYSQL_USER} MYSQL_PASSWORD=${MYSQL_PASSWORD}"

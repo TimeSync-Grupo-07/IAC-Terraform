@@ -1,0 +1,70 @@
+- name: Iniciação do serviço de captura de E-mail
+  hosts: api_db
+  become: yes
+  gather_facts: true
+
+  #Mudar nome do arquivo de exemplo das variaveis
+
+  vars:
+    repo_url: "https://github.com/TimeSync-Grupo-07/Database-MySQL.git"
+    repo_dir: "/home/ubuntu/Database-MySQL"
+    MYSQL_ROOT_PASSWORD: "senha_root"
+    MYSQL_USER: "usuario_app"
+    MYSQL_PASSWORD: "senha_app"
+
+  tasks:
+    - name: Clonar repositório Database-MySQL
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        version: main
+        update: yes
+
+    - name: Copiar .env.sample para .env
+      ansible.builtin.copy:
+        src: "{{ repo_dir }}/.env.sample"
+        dest: "{{ repo_dir }}/.env"
+        remote_src: yes
+
+    - name: Atualizar variável MYSQL_DATABASE no .env
+      ansible.builtin.lineinfile:
+        path: "{{ repo_dir }}/.env"
+        regexp: '^MYSQL_DATABASE='
+        line: "MYSQL_DATABASE=Timesync"
+        create: no
+
+    - name: Atualizar variável MYSQL_ROOT_PASSWORD no .env
+      ansible.builtin.lineinfile:
+        path: "{{ repo_dir }}/.env"
+        regexp: '^MYSQL_ROOT_PASSWORD='
+        line: "MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}"
+        create: no
+
+    - name: Atualizar variável MYSQL_USER no .env
+      ansible.builtin.lineinfile:
+        path: "{{ repo_dir }}/.env"
+        regexp: '^MYSQL_USER='
+        line: "MYSQL_USER={{ MYSQL_USER }}"
+        create: no
+
+    - name: Atualizar variável MYSQL_PASSWORD no .env
+      ansible.builtin.lineinfile:
+        path: "{{ repo_dir }}/.env"
+        regexp: '^MYSQL_PASSWORD='
+        line: "MYSQL_PASSWORD={{ MYSQL_PASSWORD }}"
+        create: no
+
+    - name: Subir container com Docker Compose
+      ansible.builtin.shell:
+        cmd: docker compose up -d
+        chdir: "{{ repo_dir }}"
+      environment:
+        COMPOSE_PROJECT_NAME: "database"
+
+    - name: Verificar containers em execução
+      ansible.builtin.shell: docker ps --format "{{'{{.Names}}\t{{.Status}}'}}"
+      register: docker_ps_output
+
+    - name: Exibir containers ativos
+      ansible.builtin.debug:
+        msg: "{{ docker_ps_output.stdout_lines }}"
