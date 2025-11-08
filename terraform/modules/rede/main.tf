@@ -136,6 +136,13 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-publico-servidor_web"
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port = 9100
+    to_port = 9100
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   
   egress {
     from_port   = 0
@@ -172,6 +179,13 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-publico-monitoramento
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port = 9090
+    to_port = 9090
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   
   egress {
     from_port   = 0
@@ -198,6 +212,13 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-publico-captura_dados
   ingress {
     from_port   = 8080
     to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -229,6 +250,13 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-privado-api-db" {
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id]
+  }
+
+  ingress {
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

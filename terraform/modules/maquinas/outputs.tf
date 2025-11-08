@@ -2,12 +2,20 @@ output "timesync-instancia-publica-servidor_web-public_ip" {
   value = aws_instance.timesync-instancia-publica-servidor_web.public_ip
 }
 
+output "timesync-instancia-publica-servidor_web-private_ip" {
+  value = aws_instance.timesync-instancia-publica-servidor_web.private_ip
+}
+
 output "timesync-instancia-publica-monitoramento-controle-public_ip" {
   value = aws_instance.timesync-instancia-monitoramento-controle.public_ip
 }
 
 output "timesync-instancia-publica-captura_dados-public_ip" {
   value = aws_instance.timesync-instancia-publica-captura_dados.public_ip
+}
+
+output "timesync-instancia-publica-captura_dados-private_ip" {
+  value = aws_instance.timesync-instancia-publica-captura_dados.private_ip
 }
 
 output "timesync-instancia-privada-api-db-private_ip" {

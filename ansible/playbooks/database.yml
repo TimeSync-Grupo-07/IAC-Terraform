@@ -1,4 +1,4 @@
-- name: Iniciação do serviço de captura de E-mail
+- name: Iniciação do serviço de banco de dados
   hosts: api_db
   become: yes
   gather_facts: true
