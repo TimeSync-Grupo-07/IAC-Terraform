@@ -117,26 +117,12 @@ resource "aws_security_group" "timesync-grupo_de_seguranca-publico-servidor_web"
   }
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
     from_port = 993
     to_port = 993
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  ingress {
-    from_port = 8888
-    to_port = 8888
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  
   ingress {
     from_port = 9100
     to_port = 9100

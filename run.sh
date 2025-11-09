@@ -61,6 +61,8 @@ ansible-playbook playbooks/api_load_balancer.yml \
   -i aws.yml \
   --extra-vars "MYSQL_USER=${MYSQL_USER} MYSQL_PASSWORD=${MYSQL_PASSWORD}"
 
+ansible-playbook -i aws.yml playbooks/front-load-balancer.yml
+
 ansible-playbook -i aws.yml playbooks/instalar_node_exporter.yml
 
 ansible-playbook -i aws.yml playbooks/grafana_env.yml
