@@ -14,7 +14,6 @@ terraform output -json bastion_ip > ../ansible/inventory/bastion.json
 terraform output -json public_hosts > ../ansible/inventory/public_hosts.json
 terraform output -json private_hosts > ../ansible/inventory/private_hosts.json
 
-
 # Captura o nome do bucket da saída do Terraform
 S3_BUCKET_NAME=$(terraform output -raw s3_bucket_name_raw)
 

@@ -143,7 +143,7 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-backup" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.timesync-lambda-function-backup.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".csv"
+    filter_suffix       = ".json"
   }
 
   depends_on = [aws_lambda_permission.timesync-lambda-permission-backup]
@@ -155,7 +155,7 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-process-raw" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.timesync-lambda-function-process-raw.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".csv"
+    filter_suffix       = ".json"
   }
 
   depends_on = [aws_lambda_permission.timesync-lambda-permission-process-raw]
@@ -167,7 +167,7 @@ resource "aws_s3_bucket_notification" "timesync-lambda-trigger-insert-db" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.timesync-lambda-function-insert-db.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".csv"
+    filter_suffix       = ".json"
   }
 
   depends_on = [aws_lambda_permission.timesync-lambda-permission-insert-db]
