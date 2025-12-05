@@ -18,6 +18,10 @@ variable "timesync-grupo_de_seguranca-publico-servidor_web-id" {
   type = string
 }
 
+variable "timesync-grupo_de_seguranca-publico-monitoramento-controle-id" {
+  type = string
+}
+
 variable "timesync-grupo_de_seguranca-publico-captura_dados-id" {
   type = string
 }

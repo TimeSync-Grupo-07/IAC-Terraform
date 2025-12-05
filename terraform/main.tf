@@ -26,6 +26,7 @@ module "maquinas" {
   timesync-grupo_de_seguranca-publico-servidor_web-id = module.rede.timesync-grupo_de_seguranca-publico-servidor_web-id
   timesync-grupo_de_seguranca-publico-captura_dados-id = module.rede.timesync-grupo_de_seguranca-publico-captura_dados-id
   timesync-grupo_de_seguranca-privado-api-db-id = module.rede.timesync-grupo_de_seguranca-privado-api-db-id
+  timesync-grupo_de_seguranca-publico-monitoramento-controle-id = module.rede.timesync-grupo_de_seguranca-publico-monitoramento-controle-id
 }
 
 module "s3" {

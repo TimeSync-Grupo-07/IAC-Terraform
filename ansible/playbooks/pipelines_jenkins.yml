@@ -1,0 +1,35 @@
+- name: Iniciação do serviço de CI/CD jenkins
+  hosts: monitoramento-controle
+  become: yes
+  gather_facts: true
+
+  vars:
+    repo_url: "https://github.com/TimeSync-Grupo-07/PIPELINES-JENKINS.git"
+    repo_dir: "/home/ubuntu/PIPELINES-JENKINS"
+
+  tasks:
+    - name: Clonar repositório PIPELINES JENKINS
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        version: main
+        update: yes
+
+    - name: Ajustar permissões da pasta jenkins_home
+      ansible.builtin.shell:
+        cmd: sudo chown -R 1000:1000 "{{ repo_dir }}/jenkins_home"
+
+    - name: Subir container com Docker Compose
+      ansible.builtin.shell:
+        cmd: docker compose up -d
+        chdir: "{{ repo_dir }}"
+      environment:
+        COMPOSE_PROJECT_NAME: "pipelines_jenkins"
+
+    - name: Verificar containers em execução
+      ansible.builtin.shell: docker ps --format "{{'{{.Names}}\t{{.Status}}'}}"
+      register: docker_ps_output
+
+    - name: Exibir containers ativos
+      ansible.builtin.debug:
+        msg: "{{ docker_ps_output.stdout_lines }}"

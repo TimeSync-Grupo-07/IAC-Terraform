@@ -22,6 +22,10 @@ output "timesync-grupo_de_seguranca-publico-servidor_web-id" {
   value = aws_security_group.timesync-grupo_de_seguranca-publico-servidor_web.id
 }
 
+output "timesync-grupo_de_seguranca-publico-monitoramento-controle-id" {
+  value = aws_security_group.timesync-grupo_de_seguranca-publico-monitoramento-controle.id
+}
+
 output "timesync-grupo_de_seguranca-publico-captura_dados-id" {
   value = aws_security_group.timesync-grupo_de_seguranca-publico-captura_dados.id
 }

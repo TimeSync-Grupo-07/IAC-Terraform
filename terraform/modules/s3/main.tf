@@ -36,18 +36,3 @@ resource "aws_s3_bucket" "backup_bucket" {
 resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
-
-resource "aws_s3_object" "pasta_apontamentos_raw" {
-  bucket = aws_s3_bucket.raw_bucket.bucket
-  key = "apontamentos/"
-}
-
-resource "aws_s3_object" "pasta_apontamentos_trusted" {
-  bucket = aws_s3_bucket.trusted_bucket.bucket
-  key = "apontamentos/"
-}
-
-resource "aws_s3_object" "pasta_apontamentos_backup" {
-  bucket = aws_s3_bucket.backup_bucket.bucket
-  key = "apontamentos/"
-}

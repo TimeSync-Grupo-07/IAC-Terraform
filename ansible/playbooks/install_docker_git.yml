@@ -1,0 +1,174 @@
+- name: Configurar ambiente base (Docker, Git, AWS CLI e utilitários)
+  hosts: all
+  become: yes
+  gather_facts: true
+  vars:
+    docker_users: [ubuntu]
+    aws_access_key_id: "ASIAYGATKH32SN7PMKCD"
+    aws_secret_access_key: "usq7Wm4nXal0rPdU64UKCjPi7krukVgkAHEMyohN"
+    aws_session_token: "IQoJb3JpZ2luX2VjEIP//////////wEaCXVzLXdlc3QtMiJHMEUCIQD47mTXkn4oXBMFXeGcIcmJIQEH5M85jp+G0WiKFexGgQIgOao2gajE9q4RFYXDHJPg/G6f96Mtef02KskGePnIChsqswIITBAAGgw1NjI2ODEyMzMxNDEiDGHudsUbmgTQfhLW1yqQAtmkl0OADOCvb5dQ5FSKR1cczrjjAyTrfM2n/ixT8xOT0ZLa3GXmjeDTkiDTfvzVzFJyDj4p8OEeVVLJvkb5nwzVtaAuOSTNkK5xrqTviAiBPXdhfWKcv9t0LDmrVzTwMnH194eP7JbqIXxoMNH+68nWVfKNXNO4aU37QwlBVsSIARFzumRQuT8bZCeRi7rLUbABEdIBq+hVOZM2HHVcj9zp9SgW4mZW49s6xgQanED7C7aeXGkk+WtMLpNqO+afzCQt5csy60/h6jeSKvd6VMdZRtqmvjPCCshjgNPdQ1NAF5hAlHEJ5mD29Kiiny8r8mkmxVpGb0nkX3YHiUt3lIU8Mnx7nsRpYwVqTvOidVeMMMTKnsgGOp0BbSzkh0LTYgogUogkFD7TPx98sCR6Fv6vUTI7A7/9H6C9+8rT7NH0TRuNEdp+2etFMvbj9EDhhjmS2CuoEGPARUeGoSjH+dljaAikNOyNHH8vCJkHvxuZ9TDSroT1mtHV2XqqhwvXol4bv6iyjiHhVnNW/gCaBXSTL/+g79kXW26lLQb5PHLxtBFzK/O0oJCBKiO0IYAVYJ8lz4+ayw=="
+    aws_default_region: "us-east-1"
+
+  tasks:
+    # ================================
+    # Atualizar cache e instalar utilitários básicos
+    # ================================
+    - name: Atualizar lista de pacotes
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar pacotes utilitários
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - zip
+          - unzip
+          - htop
+          - vim
+        state: present
+
+    # ================================
+    # Instalar Java 17 e Maven
+    # ================================
+    - name: Adicionar repositório do OpenJDK 17
+      ansible.builtin.apt_repository:
+        repo: "ppa:openjdk-r/ppa"
+        state: present
+
+    - name: Instalar Java 17 (OpenJDK)
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
+        state: present
+        update_cache: yes
+
+    - name: Instalar Maven
+      ansible.builtin.apt:
+        name: maven
+        state: present
+
+    - name: Verificar versões Java e Maven
+      ansible.builtin.shell: |
+        java -version
+        mvn -version
+      register: java_maven_version
+      changed_when: false
+
+    - name: Exibir versões Java e Maven
+      ansible.builtin.debug:
+        msg:
+          - "{{ java_maven_version.stdout_lines }}"
+
+    # ================================
+    # Instalar Docker e dependências via script oficial
+    # ================================
+    - name: Instalar Docker via script oficial
+      ansible.builtin.shell:
+        cmd: curl -fsSL https://get.docker.com | sh
+
+    - name: Iniciar e habilitar Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Adicionar usuários ao grupo docker
+      ansible.builtin.user:
+        name: "{{ item }}"
+        groups: docker
+        append: yes
+      loop: "{{ docker_users }}"
+      when: docker_users | length > 0
+
+    # ================================
+    # Instalar Git
+    # ================================
+    - name: Instalar Git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    # ================================
+    # Instalar AWS CLI v2
+    # ================================
+    - name: Baixar AWS CLI v2
+      ansible.builtin.get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    - name: Descompactar AWS CLI v2
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Instalar AWS CLI v2
+      ansible.builtin.command:
+        cmd: ./aws/install --update
+        chdir: /tmp
+
+    - name: Verificar instalação do AWS CLI
+      ansible.builtin.command: aws --version
+      register: aws_version
+      changed_when: false
+
+    # ================================
+    # Configurar credenciais AWS para usuários
+    # ================================
+    - name: Criar diretório .aws para o usuário
+      ansible.builtin.file:
+        path: "/home/{{ item }}/.aws"
+        state: directory
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0700'
+      loop: "{{ docker_users }}"
+
+    - name: Criar arquivo de credenciais AWS
+      ansible.builtin.copy:
+        dest: "/home/{{ item }}/.aws/credentials"
+        content: |
+          [default]
+          aws_access_key_id={{ aws_access_key_id }}
+          aws_secret_access_key={{ aws_secret_access_key }}
+          aws_session_token={{ aws_session_token }}
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0600'
+      loop: "{{ docker_users }}"
+
+    - name: Criar arquivo de configuração AWS
+      ansible.builtin.copy:
+        dest: "/home/{{ item }}/.aws/config"
+        content: |
+          [default]
+          region={{ aws_default_region }}
+          output=json
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '0600'
+      loop: "{{ docker_users }}"
+
+    # ================================
+    # Exibir versões instaladas
+    # ================================
+    - name: Verificar versão do Docker
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Verificar versão do Git
+      ansible.builtin.command: git --version
+      register: git_version
+      changed_when: false
+
+    - name: Mostrar versões instaladas
+      ansible.builtin.debug:
+        msg:
+          - "Docker: {{ docker_version.stdout }}"
+          - "Git: {{ git_version.stdout }}"
+          - "AWS CLI: {{ aws_version.stdout }}"
