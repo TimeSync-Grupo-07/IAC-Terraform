@@ -35,7 +35,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-raw" {
   environment {
     variables = {
       RAW_BUCKET = var.timesync-bucket-raw-bucket_name
-      NEXT_LAMBDA_ARN = aws_lambda_function.timesync-lambda-function-process-step2.arn
+      TRUSTED_BUCKET = var.timesync-bucket-trusted-bucket_name
     }
   }
 
