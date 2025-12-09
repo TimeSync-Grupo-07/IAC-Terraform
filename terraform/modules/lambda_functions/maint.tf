@@ -10,7 +10,7 @@ resource "aws_lambda_function" "timesync-lambda-function-backup" {
   filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-backup-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "backup_lambda.lambda_handler"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
@@ -27,7 +27,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-raw" {
   filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-raw-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "process_raw_lambda.lambda_handler"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 120  # Aumentado para processamento
   memory_size   = 512  # Aumentado para processamento
@@ -49,7 +49,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-step2" {
   filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-step2-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "process_step2_lambda.lambda_handler"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 120  # Aumentado para processamento
   memory_size   = 512  # Aumentado para processamento
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "timesync-lambda-function-process-trusted" {
   filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-process-trusted-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "process_trusted_lambda.lambda_handler"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
@@ -82,7 +82,7 @@ resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
   filename      = "./modules/lambda_functions/code/codigo_padrao.zip"
   function_name = "timesync-insert-db-function"
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
-  handler       = "insert_db_lambda.lambda_handler"
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
   timeout       = 60
 
