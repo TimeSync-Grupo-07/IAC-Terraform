@@ -28,11 +28,11 @@
         replace: "proxy_pass http://{{ backend_ip }}/api/;"
         backup: yes
 
-    - name: Substituir IP do backend no proxy /extract-relatorio/
+    - name: Substituir IP do backend no proxy /exportar-relatorio/
       ansible.builtin.replace:
         path: "{{ nginx_conf_path }}"
-        regexp: "proxy_pass http://[0-9\\.]+:[0-9]+/api/extract-relatorio/;"
-        replace: "proxy_pass http://{{ backend_ip }}:5000/api/extract-relatorio/;"
+        regexp: "proxy_pass http://[0-9\\.]+:[0-9]+/api/exportar-relatorio/;"
+        replace: "proxy_pass http://{{ backend_ip }}:5000/api/exportar-relatorio;"
         backup: yes
 
     - name: Mostrar IP configurado para o backend
