@@ -84,11 +84,16 @@ resource "aws_lambda_function" "timesync-lambda-function-insert-db" {
   role          = "arn:aws:iam::${var.timesync-administrador-conta-id}:role/LabRole"
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.11"
-  timeout       = 60
+  timeout       = 120
+  memory_size   = 512
 
   environment {
     variables = {
       TRUSTED_BUCKET = var.timesync-bucket-trusted-bucket_name
+      DB_HOST = var.timesync-db-host
+      DB_USER = var.timesync-db-user
+      DB_PASS = var.timesync-db-password
+      DB_NAME = var.timesync-db-name
     }
   }
 
